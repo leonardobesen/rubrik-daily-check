@@ -9,7 +9,7 @@ This projects requires the following libraries to work:
 
 ## How to use it.
 
-1- Create a JSON file named `config.json` with your (mandatory) Rubrik Cluster information and (not mandatory) SNMP information, like in the example below:
+1- Create a JSON file named `config.json` with your Rubrik Cluster information, like in the example below:
 ```
 {
     "clusters": [
@@ -33,6 +33,6 @@ This projects requires the following libraries to work:
 ```
 2- Download this repository and place in a computer or server that has access to your Rubrik CDMs
 
-3- Install dependencies: `pip install rubrik_cdm`
+3- Install dependencies: `pip install -r requirements.txt`
 
 4- Run main.py
