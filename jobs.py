@@ -4,7 +4,7 @@ import datetime
 def get_cluster_compliance(rubrik: rubrik_cdm.Connect, cluster_info: dict) -> list[dict]:
     # Getting compliance data from Rubrik API
     cluster_compliance = dict()
-    compliance = rubrik.get('v1', '/report/compliance_summary', timeout=300)
+    compliance = rubrik.get('v1', '/report/compliance_summary_sla?snapshot_range=LastSnapshot', timeout=300)
 
     # Check if return wasn't empty
     if not compliance:
