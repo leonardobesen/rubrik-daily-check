@@ -1,7 +1,8 @@
 import rubrik_cdm
 import urllib3
 
-def connect_to_cluster(cluster_adress: str,api_token: str) -> rubrik_cdm.Connect:
+
+def connect_to_cluster(cluster_adress: str, api_token: str) -> rubrik_cdm.Connect:
     # Disable HTTPS certificate warnings
     urllib3.disable_warnings()
 

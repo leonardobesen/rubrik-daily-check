@@ -1,10 +1,12 @@
 import rubrik_cdm
 import datetime
 
+
 def get_cluster_compliance(rubrik: rubrik_cdm.Connect, cluster_info: dict) -> list[dict]:
     # Getting compliance data from Rubrik API
     cluster_compliance = dict()
-    compliance = rubrik.get('v1', '/report/compliance_summary_sla?snapshot_range=LastSnapshot', timeout=300)
+    compliance = rubrik.get(
+        'v1', '/report/compliance_summary_sla?snapshot_range=LastSnapshot', timeout=300)
 
     # Check if return wasn't empty
     if not compliance:
@@ -22,8 +24,9 @@ def get_cluster_compliance(rubrik: rubrik_cdm.Connect, cluster_info: dict) -> li
 
     return [cluster_compliance]
 
+
 def cluster_long_running_jobs(rubrik: rubrik_cdm.Connect, cluster_info: dict) -> list[dict]:
-    #Setting get params
+    # Setting get params
     params = {
         "job_event_status": "Active",
         "sort_by": "StartTime",
@@ -31,7 +34,8 @@ def cluster_long_running_jobs(rubrik: rubrik_cdm.Connect, cluster_info: dict) ->
     }
 
     # Get active jobs from Rubrik API order by oldest
-    active_jobs = rubrik.get('v1','/job_monitoring', params=params, timeout=300)
+    active_jobs = rubrik.get('v1', '/job_monitoring',
+                             params=params, timeout=300)
 
     if not active_jobs:
         return [{'clusterDatacenter': f'No active jobs found {cluster_info["cluster_dc"]}'}]
@@ -51,7 +55,7 @@ def cluster_long_running_jobs(rubrik: rubrik_cdm.Connect, cluster_info: dict) ->
             threshold = datetime.timedelta(hours=48)
         else:
             threshold = datetime.timedelta(hours=24)
-        
+
         job_duration = datetime.timedelta(microseconds=job['duration'])
 
         if job_duration > threshold:
@@ -63,8 +67,9 @@ def cluster_long_running_jobs(rubrik: rubrik_cdm.Connect, cluster_info: dict) ->
             # Appending cluster data to beginning of dict
             job = {**cluster_data, **job}
             cluster_long_running_jobs.append(job)
-    
+
     if not cluster_long_running_jobs:
-        cluster_long_running_jobs = [{'clusterDatacenter': f'No long running jobs found {cluster_info["cluster_dc"]}'}]
+        cluster_long_running_jobs = [
+            {'clusterDatacenter': f'No long running jobs found {cluster_info["cluster_dc"]}'}]
 
     return cluster_long_running_jobs

@@ -3,17 +3,19 @@ import os
 from enum import Enum
 from datetime import datetime
 
+
 class Sheets(Enum):
-    CAPACITY    = 'Capacity'
-    CLUSTER     = 'Cluster_Health_Check'
-    MOUNT       = 'Live_Mounts'
-    OBJECTS     = 'Num_Objects'
-    VCENTER     = 'vCenter_Status'
-    API         = 'API_Token_Status'
+    CAPACITY = 'Capacity'
+    CLUSTER = 'Cluster_Health_Check'
+    MOUNT = 'Live_Mounts'
+    OBJECTS = 'Num_Objects'
+    VCENTER = 'vCenter_Status'
+    API = 'API_Token_Status'
     CERTIFICATE = 'AD_Certificate_Status'
-    NAS         = 'NAS_Disconnected'
-    JOBS        = 'Long_Running_Jobs'
-    SQL         = 'SQL_DBs_Removed_from_Backups'
+    NAS = 'NAS_Disconnected'
+    JOBS = 'Long_Running_Jobs'
+    SQL = 'SQL_DBs_Removed_from_Backups'
+
 
 def create_file(ROOT_DIR: str):
     # Get now datetime info formatted
@@ -24,6 +26,7 @@ def create_file(ROOT_DIR: str):
     report_path = os.path.join(ROOT_DIR, 'report_repo', file_name)
 
     return report_path
+
 
 def update_report(REPORT_FILE, **data_dict):
     # Get a set of all sheets expected from Enum
@@ -38,11 +41,14 @@ def update_report(REPORT_FILE, **data_dict):
     # Iterate over the received dict
     for sheet_name, sheet_data in data_dict.items():
         # Get Enum that correspond to the sheet_name from dict
-        sheet_enum = next((sheet for sheet in Sheets if sheet.value == sheet_name), None)
+        sheet_enum = next(
+            (sheet for sheet in Sheets if sheet.value == sheet_name), None)
         if sheet_enum:
             # Append data to excel sheet
             df = pd.DataFrame(sheet_data)
-            start_row = writer.sheets[str(sheet_enum.value)].max_row if str(sheet_enum.value) in writer.sheets else 0
-            df.to_excel(writer, sheet_name=str(sheet_enum.value), startrow=start_row, index=False, header=True)
+            start_row = writer.sheets[str(sheet_enum.value)].max_row if str(
+                sheet_enum.value) in writer.sheets else 0
+            df.to_excel(writer, sheet_name=str(sheet_enum.value),
+                        startrow=start_row, index=False, header=True)
 
     writer.close()

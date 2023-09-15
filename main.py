@@ -9,7 +9,7 @@ import expire
 import status
 import write_to_csv
 
-# Global variables 
+# Global variables
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 FILE_PATH = write_to_csv.create_file(ROOT_DIR)
 
@@ -33,29 +33,36 @@ cluster_certificate_age = []
 # Looping through clusters to perform daily check
 for cluster in config_parse['clusters']:
     # Establish connection with Rubrik CDM
-    rubrik_conn = connect.connect_to_cluster(cluster['cluster_address'], cluster['api_token'])
+    rubrik_conn = connect.connect_to_cluster(
+        cluster['cluster_address'], cluster['api_token'])
 
     # Get Rubrik CDM name
     cluster['cluster_name'] = rubrik_conn.get('internal', '/cluster/me/name')
 
     print(f"Fetching data from {cluster['cluster_dc']}")
-    # 1. Validate capacity, health check cluster and unmount Live Mounts +7 days old 
+    # 1. Validate capacity, health check cluster and unmount Live Mounts +7 days old
     cluster_capacity += capacity.get_cluster_capacity(rubrik_conn, cluster)
-    cluster_health_check += health_check.cluster_health_check(rubrik_conn, cluster)
+    cluster_health_check += health_check.cluster_health_check(
+        rubrik_conn, cluster)
     cluster_live_mounts += mounts.cluster_live_mounts(rubrik_conn, cluster)
 
     # 2. Validade total number of objects, vCenter connections and NAS Share connections
     cluster_compliance += jobs.get_cluster_compliance(rubrik_conn, cluster)
-    cluster_vcenter_status += status.cluster_vcenter_status(rubrik_conn, cluster)
-    cluster_nas_disconnected += status.cluster_nas_disconnected(rubrik_conn, cluster)
+    cluster_vcenter_status += status.cluster_vcenter_status(
+        rubrik_conn, cluster)
+    cluster_nas_disconnected += status.cluster_nas_disconnected(
+        rubrik_conn, cluster)
 
     # 3. Validate jobs taking more than 24 hours to complete and remove SLA/expire immediately SQL databases agreed upon
-    cluster_long_running_jobs += jobs.cluster_long_running_jobs(rubrik_conn, cluster)
+    cluster_long_running_jobs += jobs.cluster_long_running_jobs(
+        rubrik_conn, cluster)
     # TODO: TO BE IMPLEMENTED (Disruptive change)
-    cluster_expired_sql_dbs += expire.cluster_remove_sql_dbs(rubrik_conn, cluster)
+    cluster_expired_sql_dbs += expire.cluster_remove_sql_dbs(
+        rubrik_conn, cluster)
 
     # 4. Validate for aging API Tokens and AD certificates
-    cluster_certificate_age += status.cluster_certificate_status(rubrik_conn, cluster)
+    cluster_certificate_age += status.cluster_certificate_status(
+        rubrik_conn, cluster)
     cluster_api_age += status.cluster_api_status(rubrik_conn, cluster)
 
 # Send data somewhere

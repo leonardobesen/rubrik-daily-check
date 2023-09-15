@@ -1,8 +1,10 @@
 import rubrik_cdm
 
+
 def cluster_vcenter_status(rubrik: rubrik_cdm.Connect, cluster_info: dict) -> list[dict]:
     # Get storage info
-    vcenters = rubrik.get('v1','/vmware/vcenter?primary_cluster_id=local', timeout=300)
+    vcenters = rubrik.get(
+        'v1', '/vmware/vcenter?primary_cluster_id=local', timeout=300)
 
     # Checking with return wasn't empty
     if not vcenters:
@@ -20,6 +22,7 @@ def cluster_vcenter_status(rubrik: rubrik_cdm.Connect, cluster_info: dict) -> li
         vcenters_status.append(vcenter_placeholder)
 
     return vcenters_status
+
 
 def cluster_nas_disconnected(rubrik: rubrik_cdm.Connect, cluster_info: dict) -> list[dict]:
     # Query NAS share info
@@ -46,6 +49,7 @@ def cluster_nas_disconnected(rubrik: rubrik_cdm.Connect, cluster_info: dict) -> 
         nas_disconnected.append(nas_data)
 
     return nas_disconnected
+
 
 def cluster_api_status(rubrik: rubrik_cdm.Connect, cluster_info: dict) -> list[dict]:
     # Get user id
@@ -80,22 +84,23 @@ def cluster_api_status(rubrik: rubrik_cdm.Connect, cluster_info: dict) -> list[d
 
     return tokens
 
+
 def cluster_certificate_status(rubrik: rubrik_cdm.Connect, cluster_info: dict) -> list[dict]:
-     # Get storage info
-    certificates = rubrik.get('v1','/idp_auth_domain', timeout=300)
+    # Get storage info
+    certificates = rubrik.get('v1', '/idp_auth_domain', timeout=300)
 
     # Checking with return wasn't empty
     if not certificates:
         return [{'clusterDatacenter': f'Unable to collect Certificate data for {cluster_info["cluster_dc"]}'}]
-    
+
     ad_status = {}
     for cert in certificates['data']:
         if cert['name'] == "azure_ad" or cert['name'] == "azure-ad":
             ad_status["clusterDatacenter"] = cluster_info['cluster_dc']
             ad_status["clusterName"] = cluster_info['cluster_name']
             ad_status["name"] = cert["name"]
-            ad_status["expireDate"] =  cert["signCertExpiryDate"]
-    
+            ad_status["expireDate"] = cert["signCertExpiryDate"]
+
     # If no azure_ad mostly likely means it was removed
     if not ad_status:
         return [{'clusterDatacenter': f'No Azure AD Certificate found for {cluster_info["cluster_dc"]}!!!'}]
