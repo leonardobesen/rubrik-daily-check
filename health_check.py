@@ -19,14 +19,4 @@ def cluster_health_check(rubrik: rubrik_cdm.Connect, cluster_info: dict) -> list
     }
     cluster_health_check = {**cluster_info_dict, **cluster_health_check}
 
-    # Check if nodes affected Exists and which one has failed disks
-    cluster_health_check["unhealthyNodes"] = set()
-    try:
-        if cluster_health_check['affectedNodeIds']:
-            # Check disk status for each node
-            for node in cluster_health_check["affectedNodeIds"]:
-                cluster_health_check["unhealthyNodes"].add(node)
-    except KeyError:
-        cluster_health_check["unhealthyNodes"] = "Nenhuma falha encontrada"
-
     return [cluster_health_check]
