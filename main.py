@@ -43,8 +43,7 @@ for cluster in config_parse['clusters']:
         print(f"Fetching data from {cluster['cluster_dc']}")
         # 1. Validate capacity, health check cluster and unmount Live Mounts +7 days old
         cluster_capacity += capacity.get_cluster_capacity(rubrik_conn, cluster)
-        cluster_health_check += health_check.cluster_health_check(
-            rubrik_conn, cluster)
+        cluster_health_check += health_check.cluster_health_check(rubrik_conn, cluster)
         cluster_live_mounts += mounts.cluster_live_mounts(rubrik_conn, cluster)
 
         # 2. Validade total number of objects, vCenter connections and NAS Share connections
