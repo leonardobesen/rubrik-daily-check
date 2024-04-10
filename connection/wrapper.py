@@ -7,7 +7,7 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 # Global Variable for GraphQL URL
 GRAPHQL_URL = None
 
-def request(access_token: requests.Response, query: str, variables=None) -> dict:
+def request(access_token: str, query: str, variables=None) -> dict:
     global GRAPHQL_URL
 
     if not GRAPHQL_URL:

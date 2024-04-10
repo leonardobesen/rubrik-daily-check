@@ -7,7 +7,7 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 CONNECTION_CONFIG = None
 
-def open_session() -> requests.Response:
+def open_session() -> str:
     global CONNECTION_CONFIG
 
     if not CONNECTION_CONFIG:

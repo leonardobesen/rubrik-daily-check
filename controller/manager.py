@@ -2,7 +2,7 @@ import requests
 from connection.wrapper import request
 from query_builder import unmanaged_objects as query_builder
 
-def get_all_unmanaged_objects(access_token: requests.Response, cluster_id: str) -> list[dict]:
+def get_all_unmanaged_objects(access_token: str, cluster_id: str) -> list[dict]:
     objects_with_local_storage = []
     query, variables = query_builder.all_unmanaged_objects_by_cluster(cluster_id)
 
