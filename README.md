@@ -1,38 +1,21 @@
-# rubrik-daily-check
- Python script to perform a daily check on the enviroment
+# rubrik-snapshot-forever-cleanup
+ Python script to list all your Rubrik snapshots with Retention set to Forever, so it can be clean-up later
 
 ## Dependencies
 
-This projects requires the following libraries to work:
-- `rubrik_cdm`
-- `pandas` (If you want to send Excel reports through email)
 
 ## How to use it.
 
-1- Create a JSON file named `config.json` with your Rubrik Cluster information, like in the example below:
+1- Create a JSON file named `config.json` with your Rubrik Security Cloud (RSC) and RSC Service Account information, like in the example below:
 ```
 {
-    "clusters": [
-    {
-        "cluster_dc": "Datacenter_name_where_you_rubrik_cdm_is_located",
-        "cluster_address": "rubrik_cdm_ip_or_hostname",
-        "api_token": "api_token_of_rubrik_cdm"
-    },
-    {
-        "cluster_dc": "Datacenter2",
-        "cluster_address": "192.158.10.3",
-        "api_token": "really_long_api_string"
-    },
-    {
-        "cluster_dc": "YouGetItByNow",
-        "cluster_address": "rubrik3.mydomain.com",
-        "api_token": "really_long_api_string_2"
-    }
-    ]
+	"client_id": "your_client_id",
+	"client_secret": "your_client_secret",
+	"name": "name_you_gave",
+	"access_token_uri": "https://yourdomain.my.rubrik.com/api/client_token",
+	"graphql_url": "https://yourdomain.my.rubrik.com/api/graphql"
 }
 ```
 2- Download this repository and place in a computer or server that has access to your Rubrik CDMs
 
-3- Install dependencies: `pip install -r requirements.txt`
-
-4- Run main.py
+3- Run main.py
