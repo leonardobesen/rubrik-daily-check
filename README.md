@@ -1,8 +1,8 @@
-# rubrik-snapshot-forever-cleanup
- Python script to list all your Rubrik snapshots with Retention set to Forever, so it can be clean-up later
+# rubrik-daily-check
+ Python script to check your Rubrik enviroment health
 
 ## Dependencies
-
+- requests
 
 ## How to use it.
 
