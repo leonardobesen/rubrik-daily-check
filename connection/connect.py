@@ -1,9 +1,9 @@
-import requests
 import json
+import requests
 from configuration.configuration import load_config
-from requests.packages.urllib3.exceptions import InsecureRequestWarning
+import urllib3
 
-requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 CONNECTION_CONFIG = None
 
