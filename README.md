@@ -3,6 +3,7 @@
 
 ## Dependencies
 - requests
+- pandas
 
 ## How to use it.
 

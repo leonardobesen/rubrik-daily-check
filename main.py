@@ -1,14 +1,13 @@
 import connection.connect as connect
 import view.write_to_csv as write_to_csv
-from controller import manager
+from controller import querier
 
 
 if __name__ == '__main__':
     # Establish connection with Rubrik RSC
     rsc_access_token = connect.open_session()
 
-    print(manager.get_all_unmanaged_objects(access_token=rsc_access_token, 
-                                            cluster_id="String"))
+    # print(querier.get_all_cluster_info(access_token=rsc_access_token))
 
     # Send data somewhere
     print("Writing to file")
