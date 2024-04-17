@@ -17,7 +17,6 @@ def all_cluster_info_query() -> tuple[str, dict]:
           systemStatus
           pauseStatus
           status
-          subStatus
           state{{
             connectedState
           }}
@@ -62,13 +61,13 @@ def all_clusters_compliance():
               ComplianceStatus: enumValue
             }}
           }}
-          snappableGroupBy(groupBy: $secondaryGroupBy) {{
-            groupByInfo {{
+          clusterGroup: snappableGroupBy(groupBy: $secondaryGroupBy) {{
+            clusterInfo: groupByInfo {{
               ... on Cluster {{
-                Cluster: name
+                clusterName: name
               }}
             }}
-            snappableConnection {{
+            complianceCount: snappableConnection {{
               count
             }}
           }}

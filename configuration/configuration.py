@@ -12,3 +12,6 @@ def load_config():
         CONFIG = json.load(json_file)
 
     return CONFIG
+
+def get_root_dir() -> str:
+    return ROOT_DIR
