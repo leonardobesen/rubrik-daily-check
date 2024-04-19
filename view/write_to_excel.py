@@ -26,7 +26,7 @@ def create_file() -> str:
     return report_path
 
 
-def generate_report(cluster_info: list[Cluster]):
+def generate_report(cluster_info: list[Cluster]) -> str:
     REPORT_FILE = create_file()
 
     writer = pd.ExcelWriter(REPORT_FILE, engine='openpyxl')
@@ -34,6 +34,8 @@ def generate_report(cluster_info: list[Cluster]):
     writer = write_cluster_data(writer, cluster_info)
 
     writer.close()  # Save the Excel file
+
+    return REPORT_FILE
 
 
 def write_cluster_data(writer: pd.ExcelWriter, cluster_info: list[Cluster]) -> pd.ExcelWriter:

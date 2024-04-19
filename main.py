@@ -7,13 +7,16 @@ if __name__ == '__main__':
     # Establish connection with Rubrik RSC
     rsc_access_token = connect.open_session()
 
+    print("Collecting Data...")
     cluster_info = cluster_controller.get_all_cluster_info(access_token=rsc_access_token)
 
-    # Send data somewhere
-    print("Writing to file")
-    write_to_excel.generate_report(
+    
+    print("Writing to file...")
+    return_path = write_to_excel.generate_report(
         cluster_info=cluster_info
     )
 
-    # Close connection
+    print(f"Saved to {return_path}")
+
+    # Close session
     connect.close_session(rsc_access_token)
