@@ -4,13 +4,13 @@ from enum import Enum
 from datetime import datetime
 from configuration.configuration import get_root_dir
 from model.cluster import Cluster
-
+from model.live_mount import LiveMount
 
 class Sheets(Enum):
     CAPACITY = 'Capacity'
     CLUSTER = 'Cluster_Health_Check'
     COMPLIANCE = 'Cluster_Compliance'
-    #MOUNT = 'Live_Mounts'
+    MOUNT = 'Live_Mounts'
     #JOBS = 'Long_Running_Jobs'
     #VCENTER = 'vCenter_Status'
     #API = 'API_Token_Status'
@@ -26,16 +26,34 @@ def create_file() -> str:
     return report_path
 
 
-def generate_report(cluster_info: list[Cluster]) -> str:
+def generate_report(cluster_info: list[Cluster], 
+                    live_mount_info: list[LiveMount]) -> str:
     REPORT_FILE = create_file()
 
     writer = pd.ExcelWriter(REPORT_FILE, engine='openpyxl')
     
     writer = write_cluster_data(writer, cluster_info)
+    writer = write_live_mount_data(writer, live_mount_info)
 
     writer.close()  # Save the Excel file
 
     return REPORT_FILE
+
+
+def write_live_mount_data(writer: pd.ExcelWriter, live_mount_info: list[LiveMount]) -> pd.ExcelWriter:
+    # Add empty sheets to the workbook
+    writer.book.create_sheet(title=Sheets.MOUNT.value)
+
+    # Write cluster status to sheet
+    df_cluster = pd.DataFrame([{
+        'Cluster Name': live_mount.cluster_name,
+        'Live Mount Type': live_mount.type,
+        'Name': live_mount.name,
+        'Mounted Date': live_mount.date
+    }  for live_mount in live_mount_info])
+    df_cluster.to_excel(writer, sheet_name=Sheets.MOUNT.value, index=False)
+
+    return writer
 
 
 def write_cluster_data(writer: pd.ExcelWriter, cluster_info: list[Cluster]) -> pd.ExcelWriter:
