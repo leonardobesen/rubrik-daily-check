@@ -11,7 +11,7 @@ def create_cluster_from_data(data):
             pause_status=data["pauseStatus"],
             status=data["status"],
             connected_state=data["state"]["connectedState"],
-            is_connection_checked=data["passesConnectivityCheck"],
+            passed_connection_test=data["passesConnectivityCheck"],
             last_connection_time=data["lastConnectionTime"],
             total_capacity=data["metric"]["totalCapacity"],
             used_capacity=data["metric"]["usedCapacity"],
