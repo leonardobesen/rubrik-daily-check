@@ -1,6 +1,6 @@
 def all_vcenters_query() -> str:
     query = f"""query ListAllVcenters {{
-      vSphereVCenterConnection{{
+      vSphereVCenterConnection(sortBy:CDM_CLUSTER_NAME, sortOrder: DESC){{
         nodes{{
           name
           connectionStatus{{

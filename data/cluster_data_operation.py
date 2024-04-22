@@ -2,6 +2,7 @@ from connection.wrapper import request
 from model.cluster import Cluster
 import graphql.cluster
 
+
 def create_cluster_from_data(data):
     try:
         return Cluster(

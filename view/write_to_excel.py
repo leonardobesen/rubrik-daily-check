@@ -5,6 +5,8 @@ from datetime import datetime
 from configuration.configuration import get_root_dir
 from model.cluster import Cluster
 from model.live_mount import LiveMount
+from model.vcenter import VCenter
+from model.security import ServicesAccount, SSOCertificate
 
 class Sheets(Enum):
     CAPACITY = 'Capacity'
@@ -12,9 +14,9 @@ class Sheets(Enum):
     COMPLIANCE = 'Cluster_Compliance'
     MOUNT = 'Live_Mounts'
     #JOBS = 'Long_Running_Jobs'
-    #VCENTER = 'vCenter_Status'
-    #API = 'API_Token_Status'
-    #CERTIFICATE = 'AD_Certificate_Status'
+    VCENTER = 'vCenter_Status'
+    ACCOUNT = 'Service_Accounts_Status'
+    CERTIFICATE = 'SSO_Certificate_Status'
     #NAS = 'NAS_Disconnected'
     
 
@@ -27,17 +29,69 @@ def create_file() -> str:
 
 
 def generate_report(cluster_info: list[Cluster], 
-                    live_mount_info: list[LiveMount]) -> str:
+                    live_mount_info: list[LiveMount],
+                    vcenter_info: list[VCenter],
+                    certificate_info: list[SSOCertificate],
+                    account_info: list[ServicesAccount]) -> str:
     REPORT_FILE = create_file()
 
     writer = pd.ExcelWriter(REPORT_FILE, engine='openpyxl')
     
     writer = write_cluster_data(writer, cluster_info)
     writer = write_live_mount_data(writer, live_mount_info)
+    writer = write_vcenter_data(writer, vcenter_info)
+    writer = write_certificate_data(writer, certificate_info)
+    writer = write_account_data(writer, account_info)
 
     writer.close()  # Save the Excel file
 
     return REPORT_FILE
+
+
+def write_account_data(writer: pd.ExcelWriter, account_info: list[ServicesAccount]) -> pd.ExcelWriter:
+    # Add empty sheets to the workbook
+    writer.book.create_sheet(title=Sheets.ACCOUNT.value)
+
+    # Write cluster status to sheet
+    df_cluster = pd.DataFrame([{
+        'Name': account.name,
+        'Description': account.description,
+        'Last Login': account.last_login
+    }  for account in account_info])
+    df_cluster.to_excel(writer, sheet_name=Sheets.ACCOUNT.value, index=False)
+
+    return writer
+
+
+def write_certificate_data(writer: pd.ExcelWriter, certificate_info: list[SSOCertificate]) -> pd.ExcelWriter:
+    # Add empty sheets to the workbook
+    writer.book.create_sheet(title=Sheets.CERTIFICATE.value)
+
+    # Write cluster status to sheet
+    df_cluster = pd.DataFrame([{
+        'Name': certificate.name,
+        'Expiration Date': certificate.expiration_date
+    }  for certificate in certificate_info])
+    df_cluster.to_excel(writer, sheet_name=Sheets.CERTIFICATE.value, index=False)
+
+    return writer
+
+
+def write_vcenter_data(writer: pd.ExcelWriter, vcenter_info: list[VCenter]) -> pd.ExcelWriter:
+    # Add empty sheets to the workbook
+    writer.book.create_sheet(title=Sheets.VCENTER.value)
+
+    # Write cluster status to sheet
+    df_cluster = pd.DataFrame([{
+        'Cluster Name': vcenter.cluster_name,
+        'Name': vcenter.name,
+        'Status': vcenter.status,
+        'Status Message': vcenter.status_message,
+        'Last Refresh Time': vcenter.last_refresh_time
+    }  for vcenter in vcenter_info])
+    df_cluster.to_excel(writer, sheet_name=Sheets.VCENTER.value, index=False)
+
+    return writer
 
 
 def write_live_mount_data(writer: pd.ExcelWriter, live_mount_info: list[LiveMount]) -> pd.ExcelWriter:
