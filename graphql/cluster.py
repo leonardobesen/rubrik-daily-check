@@ -1,12 +1,12 @@
 def all_cluster_info_query() -> tuple[str, dict]:
     variables = {
-      "filter": {
-        "productFilters": [
-          {
-            "productType": "CDM"
-          }
-        ]
-      }
+        "filter": {
+            "productFilters": [
+                {
+                    "productType": "CDM"
+                }
+            ]
+        }
     }
 
     query = f"""query ListAllClustersInfo($filter: ClusterFilterInput,$sortBy: ClusterSortByEnum = ClusterName){{
@@ -40,14 +40,14 @@ def all_cluster_info_query() -> tuple[str, dict]:
 
 def all_clusters_compliance():
     variables = {
-      "primaryGroupBy": "ComplianceStatus",
-      "secondaryGroupBy": "Cluster",
-      "filter": {
-        "complianceStatus": ["IN_COMPLIANCE","OUT_OF_COMPLIANCE"],
-        "protectionStatus": [],
-        "slaTimeRange": "LAST_24_HOURS",
-        "orgId": []
-      }
+        "primaryGroupBy": "ComplianceStatus",
+        "secondaryGroupBy": "Cluster",
+        "filter": {
+            "complianceStatus": ["IN_COMPLIANCE", "OUT_OF_COMPLIANCE"],
+            "protectionStatus": [],
+            "slaTimeRange": "LAST_24_HOURS",
+            "orgId": []
+        }
     }
 
     query = f"""query GetClustersCompliance($primaryGroupBy: SnappableGroupByEnum!, 
@@ -80,11 +80,11 @@ def all_clusters_compliance():
 
 def cluster_compliance_pull_time_query(cluster_id: str) -> tuple[str, dict]:
     variables = {
-      "filter": {
-        "cluster": {
-          "id": [cluster_id]
+        "filter": {
+            "cluster": {
+                "id": [cluster_id]
+            }
         }
-      }
     }
 
     query = f"""query GetCompliancePullTimeByCluster($filter: SnappableFilterInput, 

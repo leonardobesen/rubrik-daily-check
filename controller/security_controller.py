@@ -17,12 +17,12 @@ def get_all_certificate_info(access_token: str) -> list[SSOCertificate]:
 
     if not response["data"]:
         return []
-    
+
     for item in response["data"]["allCurrentOrgIdentityProviders"]:
         certificate = data_operation.create_certificate_from_data(item)
         if certificate:
             certificate_information.append(certificate)
-    
+
     return certificate_information
 
 
@@ -39,10 +39,10 @@ def get_all_service_account_info(access_token: str) -> list[ServicesAccount]:
 
     if not response["data"]:
         return []
-    
+
     for item in response["data"]["serviceAccounts"]["nodes"]:
         account = data_operation.create_service_account_from_data(item)
         if account:
             accounts_information.append(account)
-    
+
     return accounts_information

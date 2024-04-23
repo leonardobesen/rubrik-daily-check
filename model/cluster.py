@@ -1,12 +1,13 @@
 from services.converter import iso_to_date, bytes_to_tb
 
+
 class Cluster():
-    def __init__(self, id: str, name: str, system_status: str, 
+    def __init__(self, id: str, name: str, system_status: str,
                  pause_status: str, status: str, connected_state: str,
-                 passed_connection_test: bool, last_connection_time: str, 
+                 passed_connection_test: bool, last_connection_time: str,
                  total_capacity: int, used_capacity: int,
-                 snapshot_capacity: int, system_capacity: int, 
-                 available_capacity: int, last_updated_time: str, 
+                 snapshot_capacity: int, system_capacity: int,
+                 available_capacity: int, last_updated_time: str,
                  estimated_runaway: int) -> None:
         self.id = id
         self.name = name.lower()
@@ -29,10 +30,10 @@ class Cluster():
 
     def set_in_compliance_count(self, count: int):
         self.in_compliance_count = count
-    
+
     def set_out_of_compliance_count(self, count: int):
         self.out_of_compliance_count = count
-    
+
     def set_compliance_pull_time(self, iso_str: str):
         self.compliance_pull_time = iso_to_date(iso_str)
 
@@ -47,6 +48,3 @@ class Cluster():
         in_compliance={self.in_compliance_count},
         out_of_compliance={self.out_of_compliance_count}
         pull_time={self.compliance_pull_time})"""
-       
-        
-        

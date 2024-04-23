@@ -5,20 +5,21 @@ from datetime import datetime
 from configuration.configuration import get_root_dir
 from model.cluster import Cluster
 from model.live_mount import LiveMount
-from model.vcenter import VCenter
+from model.data_source import VCenter, Nas
 from model.security import ServicesAccount, SSOCertificate
+
 
 class Sheets(Enum):
     CAPACITY = 'Capacity'
     CLUSTER = 'Cluster_Health_Check'
     COMPLIANCE = 'Cluster_Compliance'
     MOUNT = 'Live_Mounts'
-    #JOBS = 'Long_Running_Jobs'
+    # JOBS = 'Long_Running_Jobs'
     VCENTER = 'vCenter_Status'
     ACCOUNT = 'Service_Accounts_Status'
     CERTIFICATE = 'SSO_Certificate_Status'
-    #NAS = 'NAS_Disconnected'
-    
+    NAS = 'NAS_Disconnected'
+
 
 def create_file() -> str:
     # Get current datetime formatted
@@ -28,18 +29,20 @@ def create_file() -> str:
     return report_path
 
 
-def generate_report(cluster_info: list[Cluster], 
+def generate_report(cluster_info: list[Cluster],
                     live_mount_info: list[LiveMount],
                     vcenter_info: list[VCenter],
                     certificate_info: list[SSOCertificate],
-                    account_info: list[ServicesAccount]) -> str:
+                    account_info: list[ServicesAccount],
+                    nas_info: list[Nas]) -> str:
     REPORT_FILE = create_file()
 
     writer = pd.ExcelWriter(REPORT_FILE, engine='openpyxl')
-    
+
     writer = write_cluster_data(writer, cluster_info)
     writer = write_live_mount_data(writer, live_mount_info)
     writer = write_vcenter_data(writer, vcenter_info)
+    writer = write_nas_data(writer, nas_info)
     writer = write_certificate_data(writer, certificate_info)
     writer = write_account_data(writer, account_info)
 
@@ -48,17 +51,33 @@ def generate_report(cluster_info: list[Cluster],
     return REPORT_FILE
 
 
+def write_nas_data(writer: pd.ExcelWriter, nas_info: list[Nas]) -> pd.ExcelWriter:
+    # Add empty sheets to the workbook
+    writer.book.create_sheet(title=Sheets.NAS.value)
+
+    # Write cluster status to sheet
+    df_cluster = pd.DataFrame([{
+        'Cluster': nas.cluster_name,
+        'Object Id': nas.id,
+        'Name': nas.name,
+        'Connection Status': nas.connection_status
+    } for nas in nas_info])
+    df_cluster.to_excel(writer, sheet_name=Sheets.NAS.value, index=False)
+
+    return writer
+
+
 def write_account_data(writer: pd.ExcelWriter, account_info: list[ServicesAccount]) -> pd.ExcelWriter:
     # Add empty sheets to the workbook
     writer.book.create_sheet(title=Sheets.ACCOUNT.value)
 
     # Write cluster status to sheet
-    df_cluster = pd.DataFrame([{
+    df = pd.DataFrame([{
         'Name': account.name,
         'Description': account.description,
         'Last Login': account.last_login
-    }  for account in account_info])
-    df_cluster.to_excel(writer, sheet_name=Sheets.ACCOUNT.value, index=False)
+    } for account in account_info])
+    df.to_excel(writer, sheet_name=Sheets.ACCOUNT.value, index=False)
 
     return writer
 
@@ -68,11 +87,12 @@ def write_certificate_data(writer: pd.ExcelWriter, certificate_info: list[SSOCer
     writer.book.create_sheet(title=Sheets.CERTIFICATE.value)
 
     # Write cluster status to sheet
-    df_cluster = pd.DataFrame([{
+    df = pd.DataFrame([{
         'Name': certificate.name,
         'Expiration Date': certificate.expiration_date
-    }  for certificate in certificate_info])
-    df_cluster.to_excel(writer, sheet_name=Sheets.CERTIFICATE.value, index=False)
+    } for certificate in certificate_info])
+    df.to_excel(
+        writer, sheet_name=Sheets.CERTIFICATE.value, index=False)
 
     return writer
 
@@ -82,14 +102,14 @@ def write_vcenter_data(writer: pd.ExcelWriter, vcenter_info: list[VCenter]) -> p
     writer.book.create_sheet(title=Sheets.VCENTER.value)
 
     # Write cluster status to sheet
-    df_cluster = pd.DataFrame([{
+    df = pd.DataFrame([{
         'Cluster Name': vcenter.cluster_name,
         'Name': vcenter.name,
         'Status': vcenter.status,
         'Status Message': vcenter.status_message,
         'Last Refresh Time': vcenter.last_refresh_time
-    }  for vcenter in vcenter_info])
-    df_cluster.to_excel(writer, sheet_name=Sheets.VCENTER.value, index=False)
+    } for vcenter in vcenter_info])
+    df.to_excel(writer, sheet_name=Sheets.VCENTER.value, index=False)
 
     return writer
 
@@ -99,19 +119,19 @@ def write_live_mount_data(writer: pd.ExcelWriter, live_mount_info: list[LiveMoun
     writer.book.create_sheet(title=Sheets.MOUNT.value)
 
     # Write cluster status to sheet
-    df_cluster = pd.DataFrame([{
+    df = pd.DataFrame([{
         'Cluster Name': live_mount.cluster_name,
         'Live Mount Type': live_mount.type,
         'Name': live_mount.name,
         'Mounted Date': live_mount.date
-    }  for live_mount in live_mount_info])
-    df_cluster.to_excel(writer, sheet_name=Sheets.MOUNT.value, index=False)
+    } for live_mount in live_mount_info])
+    df.to_excel(writer, sheet_name=Sheets.MOUNT.value, index=False)
 
     return writer
 
 
 def write_cluster_data(writer: pd.ExcelWriter, cluster_info: list[Cluster]) -> pd.ExcelWriter:
-        # Add empty sheets to the workbook
+    # Add empty sheets to the workbook
     writer.book.create_sheet(title=Sheets.CLUSTER.value)
     writer.book.create_sheet(title=Sheets.CAPACITY.value)
     writer.book.create_sheet(title=Sheets.COMPLIANCE.value)
@@ -125,7 +145,7 @@ def write_cluster_data(writer: pd.ExcelWriter, cluster_info: list[Cluster]) -> p
         'RSC Connection with Cluster': cluster.connected_state,
         'Passed RSC Connection Test': cluster.passed_connection_test,
         'Last RSC Connection Time': cluster.last_connection_time
-    }  for cluster in cluster_info])
+    } for cluster in cluster_info])
     df_cluster.to_excel(writer, sheet_name=Sheets.CLUSTER.value, index=False)
 
     # Write cluster capacity to sheet
@@ -144,8 +164,10 @@ def write_cluster_data(writer: pd.ExcelWriter, cluster_info: list[Cluster]) -> p
     for cluster in cluster_info:
         if cluster.in_compliance_count > 0 or cluster.out_of_compliance_count > 0:
             total_object_count = cluster.in_compliance_count + cluster.out_of_compliance_count
-            percent_in_compliance = round((cluster.in_compliance_count / total_object_count) * 100, 1)
-            percent_out_of_compliance = round((cluster.out_of_compliance_count / total_object_count) * 100, 1)
+            percent_in_compliance = round(
+                (cluster.in_compliance_count / total_object_count) * 100, 1)
+            percent_out_of_compliance = round(
+                (cluster.out_of_compliance_count / total_object_count) * 100, 1)
         else:
             total_object_count = None
             percent_in_compliance = None
@@ -161,7 +183,8 @@ def write_cluster_data(writer: pd.ExcelWriter, cluster_info: list[Cluster]) -> p
             'Compliance Pull Time': cluster.compliance_pull_time
         })
 
-    df_compliance = pd.DataFrame(compliance_data)    
-    df_compliance.to_excel(writer, sheet_name=Sheets.COMPLIANCE.value, index=False)
+    df_compliance = pd.DataFrame(compliance_data)
+    df_compliance.to_excel(
+        writer, sheet_name=Sheets.COMPLIANCE.value, index=False)
 
     return writer

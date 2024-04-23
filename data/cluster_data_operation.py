@@ -48,12 +48,12 @@ def process_compliance_information(response):
 
 
 def pull_compliance_time(access_token, cluster: Cluster):
-    query, variables = graphql.cluster.cluster_compliance_pull_time_query(cluster.id)
+    query, variables = graphql.cluster.cluster_compliance_pull_time_query(
+        cluster.id)
 
     try:
         response = request(access_token, query, variables)
-        cluster.set_compliance_pull_time(response["data"]["snappableConnection"]["edges"][0]["node"]["pullTime"])
+        cluster.set_compliance_pull_time(
+            response["data"]["snappableConnection"]["edges"][0]["node"]["pullTime"])
     except:
         pass
-
-

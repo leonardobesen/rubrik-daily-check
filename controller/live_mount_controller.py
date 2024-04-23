@@ -5,8 +5,8 @@ from data import live_mount_data_operation as data_operation
 from typing import Callable
 
 
-def get_live_mount_info(access_token: str, 
-                        query_func: Callable, 
+def get_live_mount_info(access_token: str,
+                        query_func: Callable,
                         data_key: str,
                         data_operation_func: Callable) -> list[LiveMount]:
     live_mounts_information = []

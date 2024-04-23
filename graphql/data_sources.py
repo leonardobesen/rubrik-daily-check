@@ -21,15 +21,15 @@ def all_vcenters_query() -> str:
 
 def all_disconnected_nas_systems_query() -> tuple[str, dict]:
     variables = {
-      "hostRoot": "NAS_HOST_ROOT",
-      "filter": [
-        {
-          "field": "PHYSICAL_HOST_CONNECTION_STATUS",
-          "texts": [
-            "Disconnected"
-          ]
-        }
-      ]
+        "hostRoot": "NAS_HOST_ROOT",
+        "filter": [
+            {
+                "field": "PHYSICAL_HOST_CONNECTION_STATUS",
+                "texts": [
+                    "Disconnected"
+                ]
+            }
+        ]
     }
 
     query = """query NasDisconnected($hostRoot:HostRoot!, $filter: [Filter!]) {

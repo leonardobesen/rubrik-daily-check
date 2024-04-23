@@ -7,6 +7,7 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 CONNECTION_CONFIG = None
 
+
 def open_session() -> str:
     global CONNECTION_CONFIG
 
@@ -20,13 +21,14 @@ def open_session() -> str:
         'client_secret': CONNECTION_CONFIG["client_secret"]
     })
 
-    access_token = requests.post(CONNECTION_CONFIG["access_token_uri"], 
-                                 data=data, 
-                                 headers=headers, 
+    access_token = requests.post(CONNECTION_CONFIG["access_token_uri"],
+                                 data=data,
+                                 headers=headers,
                                  verify=False)
 
     if access_token.status_code != 200:
-        raise(ValueError(f"Response failed with error code {access_token.status_code}: \n{access_token.text}"))
+        raise (ValueError(
+            f"Response failed with error code {access_token.status_code}: \n{access_token.text}"))
 
     return access_token.json()["access_token"]
 
@@ -42,4 +44,5 @@ def close_session(access_token: str):
         'Authorization': f'Bearer {access_token}'
     }
 
-    requests.delete(CONNECTION_CONFIG["access_token_uri"], headers=headers, verify=False)
+    requests.delete(
+        CONNECTION_CONFIG["access_token_uri"], headers=headers, verify=False)

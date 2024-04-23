@@ -7,6 +7,7 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 # Global Variable for GraphQL URL
 GRAPHQL_URL = None
 
+
 def request(access_token: str, query: str, variables=None) -> dict:
     global GRAPHQL_URL
 
@@ -20,11 +21,14 @@ def request(access_token: str, query: str, variables=None) -> dict:
     }
 
     if not variables:
-        response = requests.post(base_url, json={'query': query}, headers=headers, verify=False)
+        response = requests.post(
+            base_url, json={'query': query}, headers=headers, verify=False)
     else:
-        response = requests.post(base_url, json={'query': query, 'variables': variables}, headers=headers, verify=False)
+        response = requests.post(base_url, json={
+                                 'query': query, 'variables': variables}, headers=headers, verify=False)
 
     if response.status_code != 200:
-        raise ValueError(f"Response failed with error code {response.status_code}: \n{response.text}")
+        raise ValueError(
+            f"Response failed with error code {response.status_code}: \n{response.text}")
 
     return response.json()

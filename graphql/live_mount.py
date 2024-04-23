@@ -1,8 +1,8 @@
 def oracle_live_mount_query() -> tuple[str, dict]:
     variables = {
-      "sortBy": {
-        "field": "CREATION_DATE"
-      }
+        "sortBy": {
+            "field": "CREATION_DATE"
+        }
     }
 
     query = f"""query ListAllLiveMounts($sortBy: OracleLiveMountSortBy){{
@@ -26,9 +26,9 @@ def oracle_live_mount_query() -> tuple[str, dict]:
 
 def vm_live_mount_query() -> tuple[str, dict]:
     variables = {
-      "sortBy": {
-        "field": "CREATION_DATE"
-      }
+        "sortBy": {
+            "field": "CREATION_DATE"
+        }
     }
 
     query = f"""query ListAllLiveMounts($sortBy: VsphereLiveMountSortBy){{
@@ -52,9 +52,9 @@ def vm_live_mount_query() -> tuple[str, dict]:
 
 def mssql_live_mount_query() -> tuple[str, dict]:
     variables = {
-      "sortBy": {
-        "field": "CREATION_DATE"
-      }
+        "sortBy": {
+            "field": "CREATION_DATE"
+        }
     }
 
     query = f"""query ListAllMssqlDbMounts($sortBy: MssqlDatabaseLiveMountSortByInput){{
@@ -78,7 +78,7 @@ def mssql_live_mount_query() -> tuple[str, dict]:
 
 def managed_volume_live_mount_query() -> tuple[str, dict]:
     variables = {
-      "sortBy": "NAME"
+        "sortBy": "NAME"
     }
 
     query = f"""query ListAllManagedVolumeMounts($sortBy: HierarchySortByField){{
