@@ -17,12 +17,12 @@ def jobs_list_sort_by_duration(after_value=None) -> tuple[str, dict]:
         ],
         "columns": [
             "event_series_id",
+            "object_name",
+            "object_type",
             "start_time",
             "duration",
             "job_status",
             "job_type",
-            "object_type",
-            "object_name",
             "sla_domain_name",
             "cluster_name"
         ],
@@ -50,6 +50,7 @@ def jobs_list_sort_by_duration(after_value=None) -> tuple[str, dict]:
         after: $after, 
         timezone: $timezone) {{
         edges {{
+          cursor
           node {{
             values {{
               displayableValue {{

@@ -6,7 +6,9 @@ from configuration.configuration import get_root_dir
 from model.cluster import Cluster
 from model.live_mount import LiveMount
 from model.data_source import VCenter, Nas
+from model.job import Job
 from model.security import ServicesAccount, SSOCertificate
+from services.formatter import format_timedelta
 
 
 class Sheets(Enum):
@@ -14,14 +16,14 @@ class Sheets(Enum):
     CLUSTER = 'Cluster_Health_Check'
     COMPLIANCE = 'Cluster_Compliance'
     MOUNT = 'Live_Mounts'
-    # JOBS = 'Long_Running_Jobs'
+    JOB = 'Long_Running_Jobs'
     VCENTER = 'vCenter_Status'
     ACCOUNT = 'Service_Accounts_Status'
     CERTIFICATE = 'SSO_Certificate_Status'
     NAS = 'NAS_Disconnected'
 
 
-def create_file() -> str:
+def create_empty_file() -> str:
     # Get current datetime formatted
     now = datetime.now().strftime("%d-%m-%Y_%H_%M_%S")
     file_name = f'Rubrik_Environment_Health_Check_{now}.xlsx'
@@ -34,14 +36,16 @@ def generate_report(cluster_info: list[Cluster],
                     vcenter_info: list[VCenter],
                     certificate_info: list[SSOCertificate],
                     account_info: list[ServicesAccount],
-                    nas_info: list[Nas]) -> str:
-    REPORT_FILE = create_file()
+                    nas_info: list[Nas],
+                    job_info: list[Job]) -> str:
+    REPORT_FILE = create_empty_file()
 
     writer = pd.ExcelWriter(REPORT_FILE, engine='openpyxl')
 
     writer = write_cluster_data(writer, cluster_info)
     writer = write_live_mount_data(writer, live_mount_info)
     writer = write_vcenter_data(writer, vcenter_info)
+    writer = write_job_data(writer, job_info)
     writer = write_nas_data(writer, nas_info)
     writer = write_certificate_data(writer, certificate_info)
     writer = write_account_data(writer, account_info)
@@ -49,6 +53,27 @@ def generate_report(cluster_info: list[Cluster],
     writer.close()  # Save the Excel file
 
     return REPORT_FILE
+
+
+def write_job_data(writer: pd.ExcelWriter, job_info: list[Job]) -> pd.ExcelWriter:
+    # Add empty sheets to the workbook
+    writer.book.create_sheet(title=Sheets.JOB.value)
+
+    # Write cluster status to sheet
+    df_cluster = pd.DataFrame([{
+        'Cluster': job.cluster_name,
+        'Event Series Id': job.id,
+        'Object Name': job.object_name,
+        'Object Type': job.object_type,
+        'Start Time': job.start_time,
+        'Duration': format_timedelta(job.duration),
+        'Job Status': job.job_status,
+        'Job Type': job.job_type,
+        'SLA Domain': job.sla_name
+    } for job in job_info])
+    df_cluster.to_excel(writer, sheet_name=Sheets.JOB.value, index=False)
+
+    return writer
 
 
 def write_nas_data(writer: pd.ExcelWriter, nas_info: list[Nas]) -> pd.ExcelWriter:
