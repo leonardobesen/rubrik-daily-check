@@ -1,13 +1,17 @@
 from datetime import datetime, timedelta
 from typing import Optional
+from configuration.configuration import get_timezone_info
+import pytz
 
 
 def iso_to_date(iso_str: str, correct_timezone=True) -> Optional[datetime]:
+    timezone = get_timezone_info()
+
     try:
-        date_obj = datetime.fromisoformat(iso_str).replace(tzinfo=None)
+        date_obj = datetime.fromisoformat(iso_str)
         if correct_timezone:
-            date_obj = date_obj - timedelta(hours=3)
-        return date_obj
+            date_obj = date_obj.astimezone(pytz.timezone(timezone))
+        return date_obj.replace(tzinfo=None)
     except ValueError:
         print(f"Invalid ISO8601 format provided")
         return None

@@ -1,3 +1,6 @@
+from configuration.configuration import get_timezone_info
+
+
 def jobs_list_sort_by_duration(after_value=None) -> tuple[str, dict]:
     if after_value:
         after_string = f"=  {after_value}"
@@ -28,7 +31,7 @@ def jobs_list_sort_by_duration(after_value=None) -> tuple[str, dict]:
         ],
         "sortBy": "start_time",
         "sortOrder": "ASC",
-        "timezone": "America/Sao_Paulo",
+        "timezone": get_timezone_info(),
         "first": 100
     }
 

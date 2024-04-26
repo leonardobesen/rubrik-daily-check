@@ -17,6 +17,9 @@
 	"graphql_url": "https://yourdomain.my.rubrik.com/api/graphql"
 }
 ```
-2- Download this repository and place in a computer or server that has access to your Rubrik CDMs
 
-3- Run main.py
+2 - Set your timezone on variable `TZ_INFO` in `configuration.py`
+
+3- Download this repository and place in a computer or server that has access to your Rubrik CDMs
+
+4- Run main.py
