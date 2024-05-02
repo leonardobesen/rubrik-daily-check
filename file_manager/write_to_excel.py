@@ -28,6 +28,7 @@ def create_empty_file() -> str:
     now = datetime.now().strftime("%d-%m-%Y_%H_%M_%S")
     file_name = f'Rubrik_Environment_Health_Check_{now}.xlsx'
     report_path = os.path.join(get_root_dir(), 'reports', file_name)
+
     return report_path
 
 
