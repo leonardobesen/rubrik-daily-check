@@ -3,7 +3,9 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaFileUpload
 from configuration.configuration import get_google_config_path
+from google.auth.transport.requests import Request
 import os
+import pickle  # Add this import for saving/loading credentials
 
 # Set up Google Drive API credentials
 SCOPES = ['https://www.googleapis.com/auth/drive.file']
@@ -11,12 +13,29 @@ SCOPES = ['https://www.googleapis.com/auth/drive.file']
 # Path to your downloaded JSON file
 CLIENT_SECRET_FILE = get_google_config_path()
 creds = None
-flow = InstalledAppFlow.from_client_secrets_file(CLIENT_SECRET_FILE, SCOPES)
-creds = flow.run_local_server(port=0)
+
+# The file token.pickle stores the user's access and refresh tokens
+TOKEN_PICKLE_FILE = 'token.pickle'
+
+# Load the credentials from token file if it exists
+if os.path.exists(TOKEN_PICKLE_FILE):
+    with open(TOKEN_PICKLE_FILE, 'rb') as token:
+        creds = pickle.load(token)
+
+# If there are no valid credentials available, perform OAuth flow
+if not creds or not creds.valid:
+    if creds and creds.expired and creds.refresh_token:
+        creds.refresh(Request())
+    else:
+        flow = InstalledAppFlow.from_client_secrets_file(CLIENT_SECRET_FILE, SCOPES)
+        creds = flow.run_local_server(port=0)
+
+    # Save the credentials for the next run
+    with open(TOKEN_PICKLE_FILE, 'wb') as token:
+        pickle.dump(creds, token)
 
 # Build the Drive service
 drive_service = build('drive', 'v3', credentials=creds)
-
 
 def upload_excel_to_drive(file_path: str, folder_id: list[str]):
     # Get the filename from the file path
