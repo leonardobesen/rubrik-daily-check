@@ -4,6 +4,7 @@ Python script to check your Rubrik enviroment health
 
 ## Dependencies
 
+- Python >= 3.9.1
 - requests
 - pandas
 - google-api-python-client
