@@ -59,7 +59,7 @@ def create_managed_volume_mount_from_data(data):
             id=data["id"],
             name=data["name"],
             type=LiveMountType.VM.value,
-            date=data["channels"]["exportDate"],
+            date=data["channels"][0]["exportDate"],
             cluster_name=data["cluster"]["name"]
         )
     except Exception as e:

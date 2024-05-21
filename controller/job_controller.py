@@ -8,7 +8,7 @@ from datetime import timedelta
 def get_all_jobs_above_24_hours(access_token: str) -> list[Job]:
     job_information = []
     above_24_hours = True
-    cursor = None
+    cursor = ""
 
     while above_24_hours:
         query, variables = graphql.jobs.jobs_list_sort_by_duration(
@@ -16,8 +16,8 @@ def get_all_jobs_above_24_hours(access_token: str) -> list[Job]:
 
         try:
             response = request(access_token, query, variables)
-        except Exception:
-            raise LookupError("Unable to collect job data!")
+        except Exception as e :
+            raise LookupError("Unable to collect job data!", e)
 
         if not response["data"]:
             above_24_hours = False

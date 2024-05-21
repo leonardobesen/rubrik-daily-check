@@ -1,12 +1,7 @@
 from configuration.configuration import get_timezone_info
 
 
-def jobs_list_sort_by_duration(after_value=None) -> tuple[str, dict]:
-    if after_value:
-        after_string = f"=  {after_value}"
-    else:
-        after_string = ""
-
+def jobs_list_sort_by_duration(after_value="") -> tuple[str, dict]:
     variables = {
         "dataView": "MONITORING_IN_PROGRESS",
         "filters": [
@@ -32,7 +27,8 @@ def jobs_list_sort_by_duration(after_value=None) -> tuple[str, dict]:
         "sortBy": "start_time",
         "sortOrder": "ASC",
         "timezone": get_timezone_info(),
-        "first": 100
+        "first": 100,
+        "after": after_value
     }
 
     query = f"""query EventsRunningForMoreThan24Hours(
@@ -42,7 +38,7 @@ def jobs_list_sort_by_duration(after_value=None) -> tuple[str, dict]:
       $sortBy: String, 
       $sortOrder: SortOrder,
       $first: Int, 
-      $after: String {after_string}, 
+      $after: String, 
       $timezone: String) {{
     	reportData(dataView: $dataView, 
         columns: $columns, 
