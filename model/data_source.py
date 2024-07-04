@@ -18,16 +18,19 @@ class VCenter():
         cluster={self.cluster_name})"""
 
 
-class Nas():
+class Host():
     def __init__(self, id: str, name: str,
-                 connection_status: str, cluster_name: str) -> None:
+                 connection_status: str, os: str,
+                 cluster_name: str) -> None:
         self.id = id
         self.name = name
         self.connection_status = connection_status
+        self.os = os
         self.cluster_name = cluster_name.lower()
 
     def __str__(self):
-        return f"""\nVCenter(id={self.id}, 
+        return f"""\nNas(id={self.id}, 
         name={self.name}, 
         connection_status={self.connection_status},
+        os={self.os}
         cluster_name={self.cluster_name})"""

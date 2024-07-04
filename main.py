@@ -20,7 +20,7 @@ if __name__ == '__main__':
         access_token=rsc_access_token)
     account_info = security_controller.get_all_service_account_info(
         access_token=rsc_access_token)
-    nas_info = data_source_controller.get_all_nas_info(
+    host_info = data_source_controller.get_all_host_info(
         access_token=rsc_access_token)
     job_info = job_controller.get_all_jobs_above_24_hours(
         access_token=rsc_access_token)
@@ -32,7 +32,7 @@ if __name__ == '__main__':
         vcenter_info=vcenter_info,
         certificate_info=certificate_info,
         account_info=account_info,
-        nas_info=nas_info,
+        host_info=host_info,
         job_info=job_info
     )
 

@@ -16,8 +16,9 @@ def get_all_jobs_above_24_hours(access_token: str) -> list[Job]:
 
         try:
             response = request(access_token, query, variables)
-        except Exception as e :
-            raise LookupError("Unable to collect job data!", e)
+        except:
+            print("Unable to collect job data!")
+            response["data"] = None
 
         if not response["data"]:
             above_24_hours = False

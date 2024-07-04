@@ -1,4 +1,4 @@
-from model.data_source import VCenter, Nas
+from model.data_source import VCenter, Host
 
 
 def create_vcenter_from_data(data):
@@ -15,14 +15,15 @@ def create_vcenter_from_data(data):
         return None
 
 
-def create_nas_from_data(data):
+def create_host_from_data(data):
     try:
-        return Nas(
+        return Host(
             id=data["id"],
             name=data["name"],
             connection_status=data["connectionStatus"]["connectivity"],
+            os=data["osType"],
             cluster_name=data["cluster"]["name"]
         )
     except Exception as e:
-        print("Error processing NAS item: ", e)
+        print("Error processing Host item: ", e)
         return None

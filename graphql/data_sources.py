@@ -19,9 +19,20 @@ def all_vcenters_query() -> str:
     return query
 
 
-def all_disconnected_nas_systems_query() -> tuple[str, dict]:
+def all_disconnected_hosts_query(os_type: str) -> tuple[str, dict]:
+    os_types = {
+        "NAS": "NAS_HOST_ROOT",
+        "WINDOWS": "WINDOWS_HOST_ROOT",
+        "LINUX": "LINUX_HOST_ROOT",
+    } 
+
+    if os_type.upper() not in os_types.keys():
+        os_type_value = os_types["NAS"]
+    else:
+        os_type_value = os_types[os_type]
+
     variables = {
-        "hostRoot": "NAS_HOST_ROOT",
+        "hostRoot": os_type_value,
         "filter": [
             {
                 "field": "PHYSICAL_HOST_CONNECTION_STATUS",
@@ -32,7 +43,7 @@ def all_disconnected_nas_systems_query() -> tuple[str, dict]:
         ]
     }
 
-    query = """query NasDisconnected($hostRoot:HostRoot!, $filter: [Filter!]) {
+    query = """query HostDisconnected($hostRoot:HostRoot!, $filter: [Filter!]) {
       physicalHosts(hostRoot:$hostRoot, filter:$filter) {
         nodes{
           id
@@ -40,6 +51,7 @@ def all_disconnected_nas_systems_query() -> tuple[str, dict]:
           connectionStatus{
             connectivity
           }
+          osType
           cluster{
             id
             name

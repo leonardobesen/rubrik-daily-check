@@ -5,7 +5,7 @@ from datetime import datetime
 from configuration.configuration import get_root_dir
 from model.cluster import Cluster
 from model.live_mount import LiveMount
-from model.data_source import VCenter, Nas
+from model.data_source import VCenter, Host
 from model.job import Job
 from model.security import ServicesAccount, SSOCertificate
 from services.formatter import format_timedelta
@@ -20,7 +20,7 @@ class Sheets(Enum):
     VCENTER = 'vCenter_Status'
     ACCOUNT = 'Service_Accounts_Status'
     CERTIFICATE = 'SSO_Certificate_Status'
-    NAS = 'NAS_Disconnected'
+    HOST = 'Host_Disconnected'
 
 
 def create_empty_file() -> str:
@@ -37,7 +37,7 @@ def generate_report(cluster_info: list[Cluster],
                     vcenter_info: list[VCenter],
                     certificate_info: list[SSOCertificate],
                     account_info: list[ServicesAccount],
-                    nas_info: list[Nas],
+                    host_info: list[Host],
                     job_info: list[Job]) -> str:
     REPORT_FILE = create_empty_file()
 
@@ -47,7 +47,7 @@ def generate_report(cluster_info: list[Cluster],
     writer = write_live_mount_data(writer, live_mount_info)
     writer = write_vcenter_data(writer, vcenter_info)
     writer = write_job_data(writer, job_info)
-    writer = write_nas_data(writer, nas_info)
+    writer = write_host_data(writer, host_info)
     writer = write_certificate_data(writer, certificate_info)
     writer = write_account_data(writer, account_info)
 
@@ -77,18 +77,19 @@ def write_job_data(writer: pd.ExcelWriter, job_info: list[Job]) -> pd.ExcelWrite
     return writer
 
 
-def write_nas_data(writer: pd.ExcelWriter, nas_info: list[Nas]) -> pd.ExcelWriter:
+def write_host_data(writer: pd.ExcelWriter, host_info: list[Host]) -> pd.ExcelWriter:
     # Add empty sheets to the workbook
-    writer.book.create_sheet(title=Sheets.NAS.value)
+    writer.book.create_sheet(title=Sheets.HOST.value)
 
     # Write cluster status to sheet
     df_cluster = pd.DataFrame([{
-        'Cluster': nas.cluster_name,
-        'Object Id': nas.id,
-        'Name': nas.name,
-        'Connection Status': nas.connection_status
-    } for nas in nas_info])
-    df_cluster.to_excel(writer, sheet_name=Sheets.NAS.value, index=False)
+        'Cluster': host.cluster_name,
+        'Object Id': host.id,
+        'Name': host.name,
+        'OS': host.os,
+        'Connection Status': host.connection_status
+    } for host in host_info])
+    df_cluster.to_excel(writer, sheet_name=Sheets.HOST.value, index=False)
 
     return writer
 

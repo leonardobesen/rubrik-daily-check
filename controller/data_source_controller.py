@@ -1,5 +1,5 @@
 from connection.wrapper import request
-from model.data_source import VCenter, Nas
+from model.data_source import VCenter, Host
 import graphql.data_sources
 from data import data_source_data_operation as data_operation
 
@@ -27,24 +27,31 @@ def get_all_vcenter_info(access_token: str) -> list[VCenter]:
     return vcenter_information
 
 
-def get_all_nas_info(access_token: str) -> list[Nas]:
-    nas_information = []
-
-    # Gather clusters information
-    query, variables = graphql.data_sources.all_disconnected_nas_systems_query()
+def _get_host_info_by_os(access_token: str, os_type: str) -> list[Host]:
+    query, variables = graphql.data_sources.all_disconnected_hosts_query(
+        os_type=os_type)
 
     try:
         response = request(access_token, query, variables)
     except Exception:
-        raise LookupError("Unable to collect NAS data!")
+        raise LookupError(f"Unable to collect {os_type} data!")
 
     if not response["data"]:
         return []
 
-    # Process cluster information
+    host_information = []
     for item in response["data"]["physicalHosts"]["nodes"]:
-        nas = data_operation.create_nas_from_data(item)
-        if nas:
-            nas_information.append(nas)
+        host = data_operation.create_host_from_data(item)
+        if host:
+            host_information.append(host)
 
-    return nas_information
+    return host_information
+
+
+def get_all_host_info(access_token: str) -> list[Host]:
+    host_information = []
+
+    for os_type in ["NAS", "LINUX", "WINDOWS"]:
+        host_information.extend(_get_host_info_by_os(access_token, os_type))
+
+    return host_information
