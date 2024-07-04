@@ -20,6 +20,7 @@ class Sheets(Enum):
     VCENTER = 'vCenter_Status'
     ACCOUNT = 'Service_Accounts_Status'
     CERTIFICATE = 'SSO_Certificate_Status'
+    NAS = 'NAS_Disconnected'
     HOST = 'Host_Disconnected'
 
 
@@ -61,7 +62,7 @@ def write_job_data(writer: pd.ExcelWriter, job_info: list[Job]) -> pd.ExcelWrite
     writer.book.create_sheet(title=Sheets.JOB.value)
 
     # Write cluster status to sheet
-    df_cluster = pd.DataFrame([{
+    df = pd.DataFrame([{
         'Cluster': job.cluster_name,
         'Event Series Id': job.id,
         'Object Name': job.object_name,
@@ -72,24 +73,32 @@ def write_job_data(writer: pd.ExcelWriter, job_info: list[Job]) -> pd.ExcelWrite
         'Job Type': job.job_type,
         'SLA Domain': job.sla_name
     } for job in job_info])
-    df_cluster.to_excel(writer, sheet_name=Sheets.JOB.value, index=False)
+    df.to_excel(writer, sheet_name=Sheets.JOB.value, index=False)
 
     return writer
 
 
 def write_host_data(writer: pd.ExcelWriter, host_info: list[Host]) -> pd.ExcelWriter:
-    # Add empty sheets to the workbook
+    # Host Sheet
     writer.book.create_sheet(title=Sheets.HOST.value)
-
-    # Write cluster status to sheet
-    df_cluster = pd.DataFrame([{
+    df_host = pd.DataFrame([{
         'Cluster': host.cluster_name,
         'Object Id': host.id,
         'Name': host.name,
         'OS': host.os,
         'Connection Status': host.connection_status
-    } for host in host_info])
-    df_cluster.to_excel(writer, sheet_name=Sheets.HOST.value, index=False)
+    } for host in host_info if host.os != "UNKNOWN"])
+    df_host.to_excel(writer, sheet_name=Sheets.HOST.value, index=False)
+
+    # NAS Sheet
+    writer.book.create_sheet(title=Sheets.NAS.value)
+    df_nas = pd.DataFrame([{
+        'Cluster': host.cluster_name,
+        'Object Id': host.id,
+        'Name': host.name,
+        'Connection Status': host.connection_status
+    } for host in host_info if host.os == "UNKNOWN"])
+    df_nas.to_excel(writer, sheet_name=Sheets.NAS.value, index=False)
 
     return writer
 
