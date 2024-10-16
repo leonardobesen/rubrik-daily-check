@@ -1,5 +1,6 @@
 import os
 import json
+from services.validations import remove_empty_strings_from_list
 from pathlib import Path
 from typing import Optional
 
@@ -26,6 +27,7 @@ def get_root_dir() -> str:
 
 def get_timezone_info() -> str:
     config = load_config()
+
     TZ_INFO_DEFAULT = "UTC"
 
     try:
@@ -51,12 +53,31 @@ def get_google_config_path() -> Optional[str]:
 
 def get_drive_folder_id() -> Optional[list[str]]:
     config = load_config()
+
     try:
-        FOLDER_ID = config["google_drive_upload_folder_id"]
-
-        if FOLDER_ID == []:
-            return None
-
-        return FOLDER_ID
+        FOLDER_ID = config["google_drive_upload_folder_ids"]
     except KeyError:
         return None
+
+    FOLDER_ID = remove_empty_strings_from_list(FOLDER_ID)
+
+    if not FOLDER_ID:
+        return None
+
+    return FOLDER_ID
+
+
+def get_excluded_clusters_uuids() -> Optional[list[str]]:
+    config = load_config()
+
+    try:
+        EXCLUDED_CLUSTERS = config["excluded_clusters_uuids"]
+    except KeyError:
+        return None
+
+    EXCLUDED_CLUSTERS = remove_empty_strings_from_list(EXCLUDED_CLUSTERS)
+
+    if not EXCLUDED_CLUSTERS:
+        return None
+
+    return EXCLUDED_CLUSTERS

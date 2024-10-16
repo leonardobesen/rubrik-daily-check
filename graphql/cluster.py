@@ -1,11 +1,14 @@
+from configuration.configuration import get_excluded_clusters_uuids
+
 def all_cluster_info_query() -> tuple[str, dict]:
     variables = {
         "filter": {
             "productFilters": [
-                {
-                    "productType": "CDM"
-                }
-            ]
+              {
+                "productType": "CDM"
+              }
+            ],
+            "excludeId": get_excluded_clusters_uuids()
         }
     }
 
@@ -50,10 +53,10 @@ def all_clusters_compliance():
         }
     }
 
-    query = f"""query GetClustersCompliance($primaryGroupBy: SnappableGroupByEnum!, 
-      $secondaryGroupBy: SnappableGroupByEnum!, 
+    query = f"""query GetClustersCompliance($primaryGroupBy: SnappableGroupByEnum!,
+      $secondaryGroupBy: SnappableGroupByEnum!,
       $filter: SnappableGroupByFilterInput) {{
-      snappableGroupByConnection(groupBy: $primaryGroupBy, 
+      snappableGroupByConnection(groupBy: $primaryGroupBy,
         filter: $filter) {{
         nodes {{
           groupByInfo {{
@@ -87,7 +90,7 @@ def cluster_compliance_pull_time_query(cluster_id: str) -> tuple[str, dict]:
         }
     }
 
-    query = f"""query GetCompliancePullTimeByCluster($filter: SnappableFilterInput, 
+    query = f"""query GetCompliancePullTimeByCluster($filter: SnappableFilterInput,
       $first: Int = 1){{
       snappableConnection(first: $first, filter: $filter){{
         edges{{
