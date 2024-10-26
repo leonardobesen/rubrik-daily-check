@@ -1,6 +1,6 @@
 import os
 import json
-from services.validations import remove_empty_strings_from_list
+from services.validations import is_str_list_effectively_empty
 from pathlib import Path
 from typing import Optional
 
@@ -59,9 +59,7 @@ def get_drive_folder_id() -> Optional[list[str]]:
     except KeyError:
         return None
 
-    FOLDER_ID = remove_empty_strings_from_list(FOLDER_ID)
-
-    if not FOLDER_ID:
+    if not is_str_list_effectively_empty(FOLDER_ID):
         return None
 
     return FOLDER_ID
@@ -75,7 +73,7 @@ def get_excluded_clusters_uuids() -> Optional[list[str]]:
     except KeyError:
         return None
 
-    EXCLUDED_CLUSTERS = remove_empty_strings_from_list(EXCLUDED_CLUSTERS)
+    EXCLUDED_CLUSTERS = is_str_list_effectively_empty(EXCLUDED_CLUSTERS)
 
     if not EXCLUDED_CLUSTERS:
         return None

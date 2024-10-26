@@ -1,2 +1,2 @@
-def remove_empty_strings_from_list(my_list: list[str]) -> list[str]:
-    return [item for item in my_list if item.strip()]
+def is_str_list_effectively_empty(my_list: list[str]):
+    return not my_list or all(not str(item).strip() for item in my_list)
