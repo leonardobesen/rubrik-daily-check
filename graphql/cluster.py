@@ -41,6 +41,7 @@ def all_cluster_info_query() -> tuple[str, dict]:
     return query, variables
 
 
+
 def all_clusters_compliance():
     variables = {
         "primaryGroupBy": "ComplianceStatus",

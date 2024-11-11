@@ -1,6 +1,6 @@
 import os
 import json
-from services.validations import is_str_list_effectively_empty
+from services.validations import clear_empty_strings
 from pathlib import Path
 from typing import Optional
 
@@ -55,14 +55,16 @@ def get_drive_folder_id() -> Optional[list[str]]:
     config = load_config()
 
     try:
-        FOLDER_ID = config["google_drive_upload_folder_ids"]
+        FOLDER_IDS = config["google_drive_upload_folder_ids"]
     except KeyError:
         return None
 
-    if not is_str_list_effectively_empty(FOLDER_ID):
+    FOLDER_IDS = clear_empty_strings(FOLDER_IDS)
+
+    if not len(FOLDER_IDS) > 0:
         return None
 
-    return FOLDER_ID
+    return FOLDER_IDS
 
 
 def get_excluded_clusters_uuids() -> Optional[list[str]]:
@@ -73,9 +75,9 @@ def get_excluded_clusters_uuids() -> Optional[list[str]]:
     except KeyError:
         return None
 
-    EXCLUDED_CLUSTERS = is_str_list_effectively_empty(EXCLUDED_CLUSTERS)
+    EXCLUDED_CLUSTERS = clear_empty_strings(EXCLUDED_CLUSTERS)
 
-    if not EXCLUDED_CLUSTERS:
+    if len(EXCLUDED_CLUSTERS) > 0:
         return None
 
     return EXCLUDED_CLUSTERS
