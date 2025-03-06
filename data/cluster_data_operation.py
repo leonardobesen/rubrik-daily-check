@@ -27,22 +27,20 @@ def create_cluster_from_data(data):
         return None
 
 
-def process_compliance_information(response):
+def process_compliance_information(response: dict, cluster_name: str):
     in_compliance = {}
     out_of_compliance = {}
 
     for node in response["data"]["snappableGroupByConnection"]["nodes"]:
-        status = node["groupByInfo"]["ComplianceStatus"]
-        cluster_group_by = node["clusterGroup"]
+        status = node["groupByInfo"]["enumValue"]
 
-        for cluster in cluster_group_by:
-            cluster_name = cluster["clusterInfo"]["clusterName"].lower()
-            count = cluster["complianceCount"]["count"]
+        cluster_name = cluster_name.lower()
+        count = node["snappableConnection"]["count"]
 
-            if status == "IN_COMPLIANCE":
-                in_compliance[cluster_name] = count
-            elif status == "OUT_OF_COMPLIANCE":
-                out_of_compliance[cluster_name] = count
+        if status == "IN_COMPLIANCE":
+            in_compliance[cluster_name] = count
+        elif status == "OUT_OF_COMPLIANCE":
+            out_of_compliance[cluster_name] = count
 
     return in_compliance, out_of_compliance
 

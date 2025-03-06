@@ -25,17 +25,18 @@ def get_all_cluster_info(access_token: str) -> list[Cluster]:
             clusters_information.append(cluster)
 
     # Gather clusters compliance information
-    query, variables = graphql.cluster.all_clusters_compliance()
+    for cluster in clusters_information:
+        query, variables = graphql.cluster.cluster_compliance(cluster.id)
 
-    try:
-        response = request(access_token, query, variables)
-    except Exception:
-        pass
+        try:
+            response = request(access_token, query, variables)
+        except Exception:
+            pass
 
-    if response["data"]["snappableGroupByConnection"]["nodes"]:
-        in_compliance, out_of_compliance = data_operation.process_compliance_information(
-            response)
-        for cluster in clusters_information:
+        if response["data"]["snappableGroupByConnection"]["nodes"]:
+            in_compliance, out_of_compliance = data_operation.process_compliance_information(
+                response, cluster.name)
+
             cluster_name_lower = cluster.name.lower()
 
             if cluster_name_lower in in_compliance:

@@ -42,42 +42,34 @@ def all_cluster_info_query() -> tuple[str, dict]:
 
 
 
-def all_clusters_compliance():
+def cluster_compliance(cluster_id: str):
     variables = {
-        "primaryGroupBy": "ComplianceStatus",
-        "secondaryGroupBy": "Cluster",
-        "filter": {
-            "complianceStatus": ["IN_COMPLIANCE", "OUT_OF_COMPLIANCE"],
-            "protectionStatus": [],
-            "slaTimeRange": "LAST_24_HOURS",
-            "orgId": []
-        }
+      "id": [cluster_id],
+      "slaTimeRange": "LAST_24_HOURS"
     }
 
-    query = f"""query GetClustersCompliance($primaryGroupBy: SnappableGroupByEnum!,
-      $secondaryGroupBy: SnappableGroupByEnum!,
-      $filter: SnappableGroupByFilterInput) {{
-      snappableGroupByConnection(groupBy: $primaryGroupBy,
-        filter: $filter) {{
-        nodes {{
-          groupByInfo {{
-            ... on ComplianceStatus {{
-              ComplianceStatus: enumValue
-            }}
-          }}
-          clusterGroup: snappableGroupBy(groupBy: $secondaryGroupBy) {{
-            clusterInfo: groupByInfo {{
-              ... on Cluster {{
-                clusterName: name
-              }}
-            }}
-            complianceCount: snappableConnection {{
-              count
-            }}
+    query = f"""query ClusterComplianceQuery($id: [UUID!], $slaTimeRange: SlaComplianceTimeRange) {{
+      snappableGroupByConnection(
+        filter: {{cluster: {{id: $id}}, slaTimeRange: $slaTimeRange}}
+        groupBy: ComplianceStatus
+      ) {{
+        ...ComplianceChartFragment
+      }}
+    }}
+
+    fragment ComplianceChartFragment on SnappableGroupByConnection {{
+      nodes {{
+        groupByInfo {{
+          ... on ComplianceStatus {{
+            enumValue
           }}
         }}
+        snappableConnection {{
+          count
+        }}
       }}
-    }}"""
+    }}
+    """
 
     return query, variables
 
