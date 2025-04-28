@@ -7,6 +7,9 @@ import pytz
 def iso_to_date(iso_str: str, should_fix_timezone=True) -> Optional[datetime]:
     timezone = get_timezone_info()
 
+    if not iso_str:
+        return None
+
     try:
         date_obj = datetime.fromisoformat(iso_str.replace('Z', '+00:00'))
         if should_fix_timezone:

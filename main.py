@@ -3,7 +3,9 @@ import file_manager.write_to_excel as write_to_excel
 import file_manager.upload_to_google_drive as uploader
 import configuration.configuration as config
 from controller import cluster_controller, data_source_controller, live_mount_controller, security_controller, job_controller
+import logging
 
+logging.basicConfig(level=logging.INFO)
 
 if __name__ == '__main__':
     # Establish connection with Rubrik RSC
