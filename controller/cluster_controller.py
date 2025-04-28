@@ -33,6 +33,9 @@ def get_all_cluster_info(access_token: str) -> list[Cluster]:
         except Exception:
             pass
 
+        if not response["data"]:
+            continue
+
         if response["data"]["snappableGroupByConnection"]["nodes"]:
             in_compliance, out_of_compliance = data_operation.process_compliance_information(
                 response, cluster.name)
