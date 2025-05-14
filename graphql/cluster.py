@@ -1,6 +1,8 @@
 from configuration.configuration import get_excluded_clusters_uuids
 
 def all_cluster_info_query() -> tuple[str, dict]:
+    excluded_cluster_list = get_excluded_clusters_uuids()
+
     variables = {
         "filter": {
             "productFilters": [
@@ -8,7 +10,7 @@ def all_cluster_info_query() -> tuple[str, dict]:
                 "productType": "CDM"
               }
             ],
-            "excludeId": get_excluded_clusters_uuids()
+            "excludeId": excluded_cluster_list
         }
     }
 

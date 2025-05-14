@@ -77,7 +77,7 @@ def get_excluded_clusters_uuids() -> Optional[list[str]]:
 
     EXCLUDED_CLUSTERS = clear_empty_strings(EXCLUDED_CLUSTERS)
 
-    if len(EXCLUDED_CLUSTERS) > 0:
+    if len(EXCLUDED_CLUSTERS) == 0:
         return None
 
     return EXCLUDED_CLUSTERS
