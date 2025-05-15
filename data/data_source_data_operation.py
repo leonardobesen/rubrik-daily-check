@@ -1,10 +1,11 @@
 import logging
+from typing import Optional
 from model.data_source import VCenter, Host
 
 logger = logging.getLogger(__name__)
 
 
-def create_vcenter_from_data(data: dict) -> VCenter | None:
+def create_vcenter_from_data(data: dict) -> Optional[VCenter]:
     """Create a VCenter object from a dictionary of data."""
     try:
         return VCenter(
@@ -23,7 +24,7 @@ def create_vcenter_from_data(data: dict) -> VCenter | None:
     return None
 
 
-def create_host_from_data(data: dict) -> Host | None:
+def create_host_from_data(data: dict) -> Optional[Host]:
     """Create a Host object from a dictionary of data."""
     try:
         return Host(

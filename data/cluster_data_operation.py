@@ -1,4 +1,5 @@
 import logging
+from typing import Optional
 from connection.wrapper import request
 from model.cluster import Cluster
 import graphql.cluster
@@ -6,7 +7,7 @@ import graphql.cluster
 logger = logging.getLogger(__name__)
 
 
-def create_cluster_from_data(data: dict) -> Cluster | None:
+def create_cluster_from_data(data: dict) -> Optional[Cluster]:
     """Create a Cluster object from a dictionary of data."""
     try:
         return Cluster(
