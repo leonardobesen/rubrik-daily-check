@@ -30,22 +30,46 @@ def get_all_vcenter_info(access_token: str) -> list[VCenter]:
 
 def _get_host_info_by_os(access_token: str, os_type: str) -> list[Host]:
     """Fetch disconnected hosts filtered by OS type."""
-    try:
-        query, variables = graphql.data_sources.all_disconnected_hosts_query(
-            os_type=os_type)
-        response = request(access_token, query, variables)
-
-        nodes = response.get("data", {}).get(
-            "physicalHosts", {}).get("nodes", [])
-    except Exception as e:
-        logger.exception(f"Failed to fetch host data for OS type {os_type}")
-        raise LookupError(f"Unable to collect {os_type} host data!") from e
-
     hosts = []
-    for item in nodes:
-        host = data_operation.create_host_from_data(item)
-        if host:
+    has_hosts = True
+    cursor = ""
+
+    while has_hosts:
+        query, variables = graphql.data_sources.all_disconnected_hosts_query(
+            os_type=os_type,
+            after_value=cursor)
+
+        try:
+            response = request(access_token, query, variables)
+
+            page_info = response.get("data", {}).get(
+                "physicalHosts", {}).get("pageInfo", [])
+            nodes = response.get("data", {}).get(
+                "physicalHosts", {}).get("nodes", [])
+        except Exception as e:
+            response["data"] = None
+            logger.exception(
+                f"Failed to fetch all host data for OS type {os_type}")
+
+        if not response["data"]:
+            has_hosts = False
+            continue
+
+        for item in nodes:
+            host = data_operation.create_host_from_data(item)
+            if not host:
+                continue
+
             hosts.append(host)
+
+        if not page_info:
+            has_hosts = False
+
+        if page_info.get("hasNextPage", False):
+            cursor = page_info.get("endCursor", "")
+
+        if not cursor:
+            has_hosts = False
 
     return hosts
 

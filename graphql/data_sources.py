@@ -19,7 +19,12 @@ def all_vcenters_query() -> str:
     return query
 
 
-def all_disconnected_hosts_query(os_type: str) -> tuple[str, dict]:
+def all_disconnected_hosts_query(os_type: str, after_value="") -> tuple[str, dict]:
+    if after_value:
+        after_string = f" = {after_value}"
+    else:
+        after_string = ""
+
     os_types = {
         "NAS": "NAS_HOST_ROOT",
         "WINDOWS": "WINDOWS_HOST_ROOT",
@@ -32,32 +37,67 @@ def all_disconnected_hosts_query(os_type: str) -> tuple[str, dict]:
         os_type_value = os_types[os_type]
 
     variables = {
-        "hostRoot": os_type_value,
-        "filter": [
-            {
-                "field": "PHYSICAL_HOST_CONNECTION_STATUS",
-                "texts": [
-                    "Disconnected"
-                ]
-            }
-        ]
+      "hostRoot": os_type_value,
+      "filter": [
+        {
+          "field": "CLUSTER_ID",
+          "texts": [
+            "ebc3f3ed-7981-4b77-a5e0-efe3ce3f48b3"
+          ]
+        },
+        {
+          "field": "IS_RELIC",
+          "texts": [
+            "false"
+          ]
+        },
+        {
+          "field": "IS_REPLICATED",
+          "texts": [
+            "false"
+          ]
+        },
+        {
+          "field": "PHYSICAL_HOST_CONNECTION_STATUS",
+          "texts": [
+            "Disconnected"
+          ]
+        },
+        {
+          "field": "IS_KUPR_HOST",
+          "texts": [
+            "false"
+          ]
+        }
+      ],
+      "sortBy": "NAME",
+      "sortOrder": "ASC"
     }
 
-    query = """query HostDisconnected($hostRoot:HostRoot!, $filter: [Filter!]) {
-      physicalHosts(hostRoot:$hostRoot, filter:$filter) {
-        nodes{
+    query = f"""query HostDisconnected(
+      $hostRoot:HostRoot!, 
+      $filter: [Filter!],
+      $after: String {after_string}) {{
+      physicalHosts(
+        hostRoot:$hostRoot, 
+        filter:$filter) {{
+        pageInfo {{
+          hasNextPage
+          endCursor      
+        }}
+        nodes{{
           id
           name
-          connectionStatus{
+          connectionStatus{{
             connectivity
-          }
+          }}
           osType
-          cluster{
+          cluster{{
             id
             name
-          }
-        }
-      }
-    }"""
+          }}
+        }}
+      }}
+    }}"""
 
     return query, variables
