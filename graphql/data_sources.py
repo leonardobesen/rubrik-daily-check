@@ -76,8 +76,7 @@ def all_disconnected_hosts_query(os_type: str, after_value="") -> tuple[str, dic
 
     query = f"""query HostDisconnected(
       $hostRoot:HostRoot!, 
-      $filter: [Filter!],
-      $after: String {after_string}) {{
+      $filter: [Filter!]) {{
       physicalHosts(
         hostRoot:$hostRoot, 
         filter:$filter) {{

@@ -2,6 +2,7 @@
 
 import json
 import logging
+from pathlib import Path
 from typing import Dict, Any, Optional, Union
 from urllib.parse import urljoin
 
@@ -23,7 +24,13 @@ class RubrikClient:
     def __init__(self) -> None:
         """Initialize the Rubrik client with configuration."""
         try:
-            self.config = load_config()
+            config = load_config()
+            json_config_path = Path(config["root_dir"]) / "configuration" / "config.json"
+            
+            # Load raw config values from JSON
+            with open(json_config_path, "r") as f:
+                self.config = json.load(f)
+                
             self.base_url = self.config["graphql_url"]
             self.token_url = self.config["access_token_uri"]
             self._access_token: Optional[str] = None
@@ -93,16 +100,9 @@ class RubrikClient:
                 'Authorization': f'Bearer {self._access_token}'
             }
 
-            response = requests.delete(
-                self.token_url,
-                headers=headers,
-                verify=False  # TODO: Make this configurable
-            )
-
-            if response.status_code not in (200, 204):
-                raise RubrikAPIError(
-                    f"Logout failed with status {response.status_code}: {response.text}"
-                )
+            # For Rubrik API, just clear the token without making a request
+            self._access_token = None
+            logger.info("Successfully cleared session token")
 
             self._access_token = None
             logger.info("Successfully logged out from Rubrik API")
