@@ -142,7 +142,7 @@ class RubrikClient:
 
             payload = {'query': query}
             if variables:
-                payload['variables'] = variables
+                payload['variables'] = variables # type: ignore
 
             response = requests.post(
                 self.base_url,

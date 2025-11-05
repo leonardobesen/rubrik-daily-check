@@ -55,7 +55,7 @@ class SSOCertificate(RubrikModel):
         )"""
 
 @dataclass
-class ServiceAccount(RubrikModel):
+class ServicesAccount(RubrikModel):
     """
     Represents a service account.
     

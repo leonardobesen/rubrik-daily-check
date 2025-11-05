@@ -3,7 +3,7 @@
 import logging
 from typing import Optional, Dict
 
-from model.security import ServiceAccount, SSOCertificate
+from model.security import ServicesAccount, SSOCertificate
 from exceptions import DataProcessingError
 
 logger = logging.getLogger(__name__)
@@ -41,7 +41,7 @@ def create_certificate_from_data(data: Dict) -> Optional[SSOCertificate]:
         logger.exception(error_msg)
         raise DataProcessingError(error_msg) from e
 
-def create_service_account_from_data(data: Dict) -> Optional[ServiceAccount]:
+def create_service_account_from_data(data: Dict) -> Optional[ServicesAccount]:
     """
     Create a ServicesAccount object from raw data.
     
@@ -61,7 +61,7 @@ def create_service_account_from_data(data: Dict) -> Optional[ServiceAccount]:
             "last_login": data["lastLogin"]
         }
         
-        account = ServiceAccount(**account_data)
+        account = ServicesAccount(**account_data)
         logger.debug(f"Successfully created Service Account for {account.name}")
         return account
         

@@ -35,7 +35,11 @@ def open_session() -> str:
     """
     try:
         client = get_client()
-        return client.authenticate()
+        access_token = client.authenticate()
+        if access_token is None:
+            logger.error("Authentication returned None as access token")
+            raise RubrikAPIError("Authentication failed: access token is None")
+        return access_token
     except Exception as e:
         logger.exception("Failed to open session")
         raise RubrikAPIError("Failed to authenticate with Rubrik API") from e

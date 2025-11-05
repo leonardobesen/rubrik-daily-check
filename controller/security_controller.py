@@ -74,7 +74,7 @@ def get_all_service_account_info(access_token: str) -> List[ServicesAccount]:
             account = data_operation.create_service_account_from_data(item)
             if account:
                 accounts_information.append(account)
-                logger.debug(f"Processed service account: {account.username}")
+                logger.debug(f"Processed service account: {account.name}")
 
     except Exception as e:
         error_msg = "Unable to collect Service Accounts data"
