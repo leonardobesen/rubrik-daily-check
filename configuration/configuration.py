@@ -1,83 +1,160 @@
-import os
+"""Configuration management module for the Rubrik Daily Check application."""
+
 import json
-from services.validations import clear_empty_strings
+import logging
+import os
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional
+from typing import List, Optional, ClassVar, Dict, Any
 
-# Global variables
-ROOT_DIR = str(Path(__file__).resolve().parent.parent)
-REPORT_PATH = os.path.join(ROOT_DIR, 'reports')
-CONFIG_FILE = os.path.join(ROOT_DIR, 'configuration', 'config.json')
+from services.validations import clear_empty_strings
+from exceptions import ConfigurationError
 
-# Global variable to store configuration data
-CONFIG = None
+logger = logging.getLogger(__name__)
 
+@dataclass
+class AppConfig:
+    """Application configuration container."""
+    
+    # Class-level constants
+    DEFAULT_TIMEZONE: ClassVar[str] = "UTC"
+    
+    # Instance variables
+    root_dir: Path
+    config_file: Path
+    reports_dir: Path
+    timezone: str
+    client_id: str
+    client_secret: str
+    graphql_url: str
+    access_token_uri: str
+    google_drive_config: Optional[Path]
+    google_drive_folder_ids: List[str]
+    excluded_cluster_uuids: List[str]
+    
+    @classmethod
+    def load(cls) -> 'AppConfig':
+        """
+        Load configuration from the config file.
+        
+        Returns:
+            AppConfig: Initialized configuration object
+            
+        Raises:
+            ConfigurationError: If configuration loading or validation fails
+        """
+        try:
+            # Set up basic paths
+            root_dir = Path(__file__).resolve().parent.parent
+            config_file = root_dir / 'configuration' / 'config.json'
+            reports_dir = root_dir / 'reports'
+            google_config = root_dir / 'configuration' / 'google_drive.json'
 
-def load_config():
-    global CONFIG
-    if CONFIG is None:
-        with open(CONFIG_FILE, 'r') as json_file:
-            CONFIG = json.load(json_file)
-    return CONFIG
+            # Ensure config file exists
+            if not config_file.exists():
+                raise ConfigurationError(f"Configuration file not found: {config_file}")
 
+            # Load and parse config file
+            with open(config_file, 'r') as f:
+                config_data = json.load(f)
+
+            # Validate required fields
+            required_fields = ['client_id', 'client_secret', 'graphql_url', 'access_token_uri']
+            missing_fields = [field for field in required_fields if field not in config_data]
+            if missing_fields:
+                raise ConfigurationError(f"Missing required configuration fields: {', '.join(missing_fields)}")
+
+            # Process optional fields with defaults
+            timezone = config_data.get('tz_info', cls.DEFAULT_TIMEZONE)
+            if not timezone:
+                timezone = cls.DEFAULT_TIMEZONE
+                logger.warning(f"Empty timezone specified, using default: {cls.DEFAULT_TIMEZONE}")
+
+            # Process Google Drive configuration
+            google_drive_config = google_config if google_config.exists() else None
+            if not google_drive_config:
+                logger.warning("Google Drive configuration file not found")
+
+            # Process lists with empty string cleaning
+            folder_ids = clear_empty_strings(config_data.get('google_drive_upload_folder_ids', []))
+            cluster_uuids = clear_empty_strings(config_data.get('excluded_clusters_uuids', []))
+
+            return cls(
+                root_dir=root_dir,
+                config_file=config_file,
+                reports_dir=reports_dir,
+                timezone=timezone,
+                client_id=config_data['client_id'],
+                client_secret=config_data['client_secret'],
+                graphql_url=config_data['graphql_url'],
+                access_token_uri=config_data['access_token_uri'],
+                google_drive_config=google_drive_config,
+                google_drive_folder_ids=folder_ids,
+                excluded_cluster_uuids=cluster_uuids
+            )
+
+        except Exception as e:
+            error_msg = "Failed to load configuration"
+            logger.exception(error_msg)
+            raise ConfigurationError(f"{error_msg}: {str(e)}") from e
+
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert configuration to dictionary format."""
+        return {
+            'root_dir': str(self.root_dir),
+            'reports_dir': str(self.reports_dir),
+            'timezone': self.timezone,
+            'graphql_url': self.graphql_url,
+            'access_token_uri': self.access_token_uri,
+            'google_drive_config': str(self.google_drive_config) if self.google_drive_config else None,
+            'google_drive_folder_ids': self.google_drive_folder_ids,
+            'excluded_cluster_uuids': self.excluded_cluster_uuids
+        }
+
+# Global configuration instance
+_config: Optional[AppConfig] = None
+
+def get_config() -> AppConfig:
+    """
+    Get the global configuration instance.
+    
+    Returns:
+        AppConfig: The global configuration object
+        
+    Raises:
+        ConfigurationError: If configuration loading fails
+    """
+    global _config
+    if _config is None:
+        _config = AppConfig.load()
+    return _config
+
+# Legacy compatibility functions
+def load_config() -> Dict[str, Any]:
+    """Legacy function for backward compatibility."""
+    return get_config().to_dict()
 
 def get_root_dir() -> str:
-    return ROOT_DIR
-
+    """Legacy function for backward compatibility."""
+    return str(get_config().root_dir)
 
 def get_timezone_info() -> str:
-    config = load_config()
-
-    TZ_INFO_DEFAULT = "UTC"
-
-    try:
-        TZ_INFO = config["tz_info"]
-
-        if TZ_INFO == "":
-            return TZ_INFO_DEFAULT
-
-        return TZ_INFO
-    except KeyError:
-        return TZ_INFO_DEFAULT
-
+    """Legacy function for backward compatibility."""
+    return get_config().timezone
 
 def get_google_config_path() -> Optional[str]:
-    try:
-        GOOGLE_FILE = os.path.join(
-            ROOT_DIR, 'configuration', 'google_drive.json')
-        return GOOGLE_FILE
-    except:
-        raise ValueError(
-            "Unable to find Google Drive OAuth Crendential file 'google_drive.json' on configuration folder")
+    """Legacy function for backward compatibility."""
+    config = get_config()
+    if not config.google_drive_config:
+        raise ValueError("Google Drive configuration file not found")
+    return str(config.google_drive_config)
 
+def get_drive_folder_id() -> Optional[List[str]]:
+    """Legacy function for backward compatibility."""
+    folders = get_config().google_drive_folder_ids
+    return folders if folders else None
 
-def get_drive_folder_id() -> Optional[list[str]]:
-    config = load_config()
-
-    try:
-        FOLDER_IDS = config["google_drive_upload_folder_ids"]
-    except KeyError:
-        return None
-
-    FOLDER_IDS = clear_empty_strings(FOLDER_IDS)
-
-    if not len(FOLDER_IDS) > 0:
-        return None
-
-    return FOLDER_IDS
-
-
-def get_excluded_clusters_uuids() -> Optional[list[str]]:
-    config = load_config()
-
-    try:
-        EXCLUDED_CLUSTERS = config["excluded_clusters_uuids"]
-    except KeyError:
-        return None
-
-    EXCLUDED_CLUSTERS = clear_empty_strings(EXCLUDED_CLUSTERS)
-
-    if len(EXCLUDED_CLUSTERS) == 0:
-        return None
-
-    return EXCLUDED_CLUSTERS
+def get_excluded_clusters_uuids() -> Optional[List[str]]:
+    """Legacy function for backward compatibility."""
+    clusters = get_config().excluded_cluster_uuids
+    return clusters if clusters else None

@@ -1,34 +1,48 @@
-import requests
-from configuration.configuration import load_config
-import urllib3
+"""Legacy wrapper module for backward compatibility."""
 
-urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+import logging
+from typing import Dict, Any, Optional
 
-# Global Variable for GraphQL URL
-GRAPHQL_URL = None
+from connection.client import RubrikClient
+from exceptions import RubrikAPIError
 
+logger = logging.getLogger(__name__)
 
-def request(access_token: str, query: str, variables=None) -> dict:
-    global GRAPHQL_URL
+# Global client instance for backward compatibility
+_client: Optional[RubrikClient] = None
 
-    if not GRAPHQL_URL:
-        GRAPHQL_URL = load_config()["graphql_url"]
+def get_client() -> RubrikClient:
+    """
+    Get or create the global RubrikClient instance.
+    
+    Returns:
+        RubrikClient: The global client instance
+    """
+    global _client
+    if not _client:
+        _client = RubrikClient()
+    return _client
 
-    base_url = GRAPHQL_URL
-    headers = {
-        'Content-Type': 'application/json',
-        'Authorization': f'Bearer {access_token}'
-    }
-
-    if not variables:
-        response = requests.post(
-            base_url, json={'query': query}, headers=headers, verify=False)
-    else:
-        response = requests.post(base_url, json={
-                                 'query': query, 'variables': variables}, headers=headers, verify=False)
-
-    if response.status_code != 200:
-        raise ValueError(
-            f"Response failed with error code {response.status_code}: \n{response.text}")
-
-    return response.json()
+def request(access_token: str, query: str, variables: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    """
+    Legacy wrapper for making GraphQL requests.
+    
+    Args:
+        access_token: The access token for authentication
+        query: The GraphQL query string
+        variables: Optional variables for the GraphQL query
+        
+    Returns:
+        The JSON response from the API
+        
+    Raises:
+        RubrikAPIError: If the request fails
+    """
+    client = get_client()
+    client._access_token = access_token  # Set token directly for backward compatibility
+    
+    try:
+        return client.graphql_request(query, variables)
+    except Exception as e:
+        logger.exception("GraphQL request failed")
+        raise RubrikAPIError(str(e)) from e

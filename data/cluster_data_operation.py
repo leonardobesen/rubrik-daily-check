@@ -1,39 +1,66 @@
+"""Data operations for Rubrik clusters."""
+
 import logging
-from typing import Optional
+from typing import Optional, Tuple, Dict
+from dataclasses import asdict
+
 from connection.wrapper import request
 from model.cluster import Cluster
 import graphql.cluster
+from exceptions import DataProcessingError
 
 logger = logging.getLogger(__name__)
 
-
-def create_cluster_from_data(data: dict) -> Optional[Cluster]:
-    """Create a Cluster object from a dictionary of data."""
+def create_cluster_from_data(data: Dict) -> Optional[Cluster]:
+    """
+    Create a Cluster object from API response data.
+    
+    Args:
+        data: Dictionary containing cluster data from API
+        
+    Returns:
+        Optional[Cluster]: Cluster object if successful, None if error
+        
+    Raises:
+        DataProcessingError: If required data is missing or invalid
+    """
     try:
-        return Cluster(
-            id=data["id"],
-            name=data["name"],
-            system_status=data["systemStatus"],
-            pause_status=data["pauseStatus"],
-            status=data["status"],
-            connected_state=data.get("state", {}).get("connectedState"),
-            passed_connection_test=data.get("passesConnectivityCheck"),
-            last_connection_time=data.get("lastConnectionTime"),
-            total_capacity=data.get("metric", {}).get("totalCapacity"),
-            used_capacity=data.get("metric", {}).get("usedCapacity"),
-            snapshot_capacity=data.get("metric", {}).get("snapshotCapacity"),
-            system_capacity=data.get("metric", {}).get("systemCapacity"),
-            available_capacity=data.get("metric", {}).get("availableCapacity"),
-            last_updated_time=data.get("metric", {}).get("lastUpdateTime"),
-            estimated_runaway=data.get("estimatedRunway")
-        )
+        # Extract metrics data for better readability
+        metrics = data.get("metric", {})
+        state = data.get("state", {})
+        
+        cluster_data = {
+            "id": data["id"],
+            "name": data["name"],
+            "system_status": data["systemStatus"],
+            "pause_status": data["pauseStatus"],
+            "status": data["status"],
+            "connected_state": state.get("connectedState"),
+            "passed_connection_test": data.get("passesConnectivityCheck", False),
+            "last_connection_time": data.get("lastConnectionTime"),
+            "total_capacity": metrics.get("totalCapacity", 0),
+            "used_capacity": metrics.get("usedCapacity", 0),
+            "snapshot_capacity": metrics.get("snapshotCapacity", 0),
+            "system_capacity": metrics.get("systemCapacity", 0),
+            "available_capacity": metrics.get("availableCapacity", 0),
+            "last_updated_time": metrics.get("lastUpdateTime"),
+            "estimated_runaway": data.get("estimatedRunway", 0)
+        }
+        
+        # Create cluster instance using our dataclass
+        cluster = Cluster(**cluster_data)
+        logger.debug(f"Successfully created Cluster object for {cluster.name}")
+        return cluster
+        
     except KeyError as e:
-        logger.error(
-            f"Missing expected cluster data field: {e}", exc_info=True)
+        error_msg = f"Missing required cluster data field: {str(e)}"
+        logger.error(error_msg, exc_info=True)
+        raise DataProcessingError(error_msg) from e
+        
     except Exception as e:
-        logger.exception(
-            "Unexpected error while creating Cluster object", exc_info=True)
-    return None
+        error_msg = f"Error creating Cluster object: {str(e)}"
+        logger.exception(error_msg)
+        raise DataProcessingError(error_msg) from e
 
 
 def process_compliance_information(response: dict, cluster: Cluster) -> tuple[dict, dict]:

@@ -1,48 +1,59 @@
-import json
-import requests
-from configuration.configuration import load_config
-import urllib3
+"""Legacy connection module for backward compatibility."""
 
-urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+import logging
+from typing import Optional
 
-CONNECTION_CONFIG = None
+from connection.client import RubrikClient
+from exceptions import RubrikAPIError
 
+logger = logging.getLogger(__name__)
+
+# Global client instance for backward compatibility
+_client: Optional[RubrikClient] = None
+
+def get_client() -> RubrikClient:
+    """
+    Get or create the global RubrikClient instance.
+    
+    Returns:
+        RubrikClient: The global client instance
+    """
+    global _client
+    if not _client:
+        _client = RubrikClient()
+    return _client
 
 def open_session() -> str:
-    global CONNECTION_CONFIG
+    """
+    Open a new session with the Rubrik API.
+    
+    Returns:
+        str: The access token for the session
+        
+    Raises:
+        RubrikAPIError: If authentication fails
+    """
+    try:
+        client = get_client()
+        return client.authenticate()
+    except Exception as e:
+        logger.exception("Failed to open session")
+        raise RubrikAPIError("Failed to authenticate with Rubrik API") from e
 
-    if not CONNECTION_CONFIG:
-        CONNECTION_CONFIG = load_config()
-
-    headers = {'Content-Type': 'application/json'}
-
-    data = json.dumps({
-        'client_id': CONNECTION_CONFIG["client_id"],
-        'client_secret': CONNECTION_CONFIG["client_secret"]
-    })
-
-    access_token = requests.post(CONNECTION_CONFIG["access_token_uri"],
-                                 data=data,
-                                 headers=headers,
-                                 verify=False)
-
-    if access_token.status_code != 200:
-        raise (ValueError(
-            f"Response failed with error code {access_token.status_code}: \n{access_token.text}"))
-
-    return access_token.json()["access_token"]
-
-
-def close_session(access_token: str):
-    global CONNECTION_CONFIG
-
-    if not CONNECTION_CONFIG:
-        CONNECTION_CONFIG = load_config()
-
-    headers = {
-        'Content-Type': 'application/json',
-        'Authorization': f'Bearer {access_token}'
-    }
-
-    requests.delete(
-        CONNECTION_CONFIG["access_token_uri"], headers=headers, verify=False)
+def close_session(access_token: str) -> None:
+    """
+    Close an existing session with the Rubrik API.
+    
+    Args:
+        access_token: The access token to invalidate
+        
+    Raises:
+        RubrikAPIError: If logout fails
+    """
+    try:
+        client = get_client()
+        client._access_token = access_token  # Set token directly for backward compatibility
+        client.logout()
+    except Exception as e:
+        logger.exception("Failed to close session")
+        raise RubrikAPIError("Failed to logout from Rubrik API") from e
