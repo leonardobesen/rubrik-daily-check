@@ -12,11 +12,13 @@ from exceptions import RubrikAPIError
 
 logger = logging.getLogger(__name__)
 
+
 class OSType(Enum):
     """Supported operating system types for hosts."""
     NAS = auto()
     LINUX = auto()
     WINDOWS = auto()
+
 
 def get_all_vcenter_info(access_token: str) -> List[VCenter]:
     """
@@ -31,30 +33,30 @@ def get_all_vcenter_info(access_token: str) -> List[VCenter]:
     Raises:
         RubrikAPIError: If there's an error collecting vCenter data
     """
-    try:
-        query = graphql.data_sources.all_vcenters_query()
-        response = request(access_token, query)
+    query = graphql.data_sources.all_vcenters_query()
+    response = request(access_token, query)
 
-        if not isinstance(response, Dict) or "data" not in response:
-            logger.error("Invalid response format from Rubrik API")
-            return []
+    if not isinstance(response, Dict) or "data" not in response:
+        logger.error("Invalid response format from Rubrik API")
+        return []
 
-        nodes = response.get("data", {}).get(
-            "vSphereVCenterConnection", {}).get("nodes", [])
-        
-        vcenters = []
-        for item in nodes:
+    nodes = response.get("data", {}).get(
+        "vSphereVCenterConnection", {}).get("nodes", [])
+
+    vcenters = []
+    for item in nodes:
+        try:
             vcenter = data_operation.create_vcenter_from_data(item)
             if vcenter:
                 vcenters.append(vcenter)
                 logger.debug(f"Processed vCenter: {vcenter.name}")
+        except Exception:
+            error_msg = "Failed to fetch vCenter data"
+            logger.exception(error_msg)
+            continue
 
-        return vcenters
+    return vcenters
 
-    except Exception as e:
-        error_msg = "Failed to fetch vCenter data"
-        logger.exception(error_msg)
-        raise RubrikAPIError(error_msg) from e
 
 def _get_host_info_by_os(access_token: str, os_type: str) -> List[Host]:
     """
@@ -99,7 +101,7 @@ def _get_host_info_by_os(access_token: str, os_type: str) -> List[Host]:
             # Check if there are more pages
             if not page_info or not page_info.get("hasNextPage", False):
                 break
-            
+
             cursor = page_info.get("endCursor")
             if not cursor:
                 break
@@ -109,6 +111,7 @@ def _get_host_info_by_os(access_token: str, os_type: str) -> List[Host]:
             break
 
     return hosts
+
 
 def get_all_host_info(access_token: str) -> List[Host]:
     """
@@ -124,7 +127,7 @@ def get_all_host_info(access_token: str) -> List[Host]:
         Continues processing even if one OS type fails
     """
     hosts: List[Host] = []
-    
+
     for os_type in OSType:
         try:
             os_hosts = _get_host_info_by_os(access_token, os_type.name)
