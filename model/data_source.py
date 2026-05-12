@@ -51,12 +51,15 @@ class VCenter(RubrikModel):
     name: str
     status: str
     status_message: str
-    last_refresh_time: datetime
+    last_refresh_time: datetime | None
     cluster_name: str
 
     def __post_init__(self):
         """Post-initialization processing."""
-        self.last_refresh_time = iso_to_date(self.last_refresh_time)
+        if self.last_refresh_time and isinstance(self.last_refresh_time, str):
+            self.last_refresh_time = iso_to_date(self.last_refresh_time)
+        else:
+            self.last_refresh_time = None
         self.cluster_name = self.cluster_name.lower()
 
     def __str__(self) -> str:
