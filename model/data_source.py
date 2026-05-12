@@ -3,11 +3,14 @@ from services.converter import iso_to_date
 
 class VCenter():
     def __init__(self, name: str, status: str, status_message: str,
-                 last_refresh_time: str, cluster_name: str) -> None:
+                 last_refresh_time: str | None, cluster_name: str) -> None:
         self.name = name
         self.status = status
         self.status_message = status_message
-        self.last_refresh_time = iso_to_date(last_refresh_time)
+        if last_refresh_time:
+            self.last_refresh_time = iso_to_date(last_refresh_time)
+        else:
+            self.last_refresh_time = None
         self.cluster_name = cluster_name.lower()
 
     def __str__(self):
